@@ -1,0 +1,57 @@
+---
+swagger: "2.0"
+info:
+  version: "0.0.0"
+  title: "Network Orchestrator API"
+paths:
+  /:
+    get:
+      description: "Simple check"
+      parameters: []
+      responses:
+        200:
+          description: "OK, returns version"
+          schema:
+            type: "string"
+        default:
+          description: "KO"
+          schema:
+            $ref: "#/definitions/Error"
+  /list:
+    get:
+      parameters: []
+      responses:
+        200:
+          description: "List existing networks"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Network"
+        default:
+          description: "KO"
+          schema:
+            $ref: "#/definitions/Error"
+definitions:
+  Network:
+    type: "object"
+    required:
+    - "id"
+    properties:
+      id:
+        type: "integer"
+        format: "int64"
+      title:
+        type: "string"
+      user:
+        type: "string"
+  Error:
+    type: "object"
+    required:
+    - "code"
+    - "message"
+    properties:
+      code:
+        type: "integer"
+        format: "int32"
+      message:
+        type: "string"
