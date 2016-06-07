@@ -1,12 +1,17 @@
 all: run
 
-run: Gemfile.lock
+run: fetch
 	bundle exec rackup
 
 check:
 	:
 
+fetch: Gemfile.lock
+
+clean:
+	rm -fv Gemfile.lock
+
 Gemfile.lock:
 	bundle install
 
-.PHONY: all run check
+.PHONY: all check clean fetch run
