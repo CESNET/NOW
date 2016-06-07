@@ -1,20 +1,21 @@
 require 'sinatra'
 require 'sinatra/cross_origin'
+require ::File.expand_path('../../version',  __FILE__)
 
 module Now
 
   class Application < Sinatra::Base
+    attr_accessor :nebula
     register Sinatra::CrossOrigin
-    attr_accessor :api_version
 
     def initialize
       super
-      @api_version = '0.0.0'
+      @nebula = $nebula
     end
 
     get // do
       cross_origin
-      @api_version
+      API_VERSION
     end
 
   end
