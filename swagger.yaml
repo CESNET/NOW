@@ -31,6 +31,24 @@ paths:
           description: "KO"
           schema:
             $ref: "#/definitions/Error"
+  /network/{id}:
+    get:
+      parameters:
+        - in: "path"
+          name: "id"
+          description: "Network ID"
+          required: true
+          type: "integer"
+          format: "int64"
+      responses:
+        200:
+          description: "Get information about network"
+          schema:
+            $ref: "#/definitions/Network"
+        default:
+          description: "KO"
+          schema:
+            $ref: "#/definitions/Error"
 definitions:
   Network:
     type: "object"

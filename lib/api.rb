@@ -28,6 +28,17 @@ module Now
         halt e.code, e.message
       end
     end
+
+    get '/network/:id' do
+      cross_origin
+      begin
+        network = @nebula.get(params['id'])
+        JSON.pretty_generate(network)
+      rescue NowError => e
+        halt e.code, e.message
+      end
+    end
+
   end
 
 end

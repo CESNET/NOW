@@ -48,10 +48,7 @@ module Now
 
     def list_networks()
       vn_pool = OpenNebula::VirtualNetworkPool.new(client, -1)
-      req = vn_pool.info
-      if OpenNebula.is_error?(req)
-        raise NowError.new({code: 500, message: req.message})
-      end
+      check(vn_pool.info)
 
       networks = []
       vn_pool.each do |vn|
@@ -62,6 +59,50 @@ module Now
       end
 
       return networks
+    end
+
+    def get(network_id)
+      vn_generic = OpenNebula::VirtualNetwork.build_xml(network_id)
+      vn = OpenNebula::VirtualNetwork.new(vn_generic, @client)
+      check(vn.info)
+
+      id = vn.id
+      title = vn.name
+      @logger.debug "OpenNebula get(#{network_id}) ==> #{id}, #{title}"
+      network = Network.new({id: id, title: title})
+
+      return network.to_hash
+    end
+
+    private
+
+    def check(return_code)
+      if !OpenNebula.is_error?(return_code)
+        return true
+      end
+
+      case return_code.errno
+        when OpenNebula::Error::ESUCCESS
+          code = 200
+        when OpenNebula::Error::EAUTHENTICATION
+          code = 401
+        when OpenNebula::Error::EAUTHORIZATION
+          code = 403
+        when OpenNebula::Error::ENO_EXISTS
+          code = 404
+        when OpenNebula::Error::EXML_RPC_API
+          code = 500
+        when OpenNebula::Error::EACTION
+          code = 400
+        when OpenNebula::Error::EINTERNAL
+          code = 500
+        when OpenNebula::Error::ENOTDEFINED
+          code = 501
+        else
+          code = 500
+      end
+
+      raise NowError.new({code: code, message: return_code.message})
     end
 
   end
