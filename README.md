@@ -7,3 +7,10 @@ This is the component to extend OpenNebula network orchestration capabilities.
 ```
 rackup
 ```
+
+## Development
+```
+make run
+```
+
+It calls `rackup` through bundler.
