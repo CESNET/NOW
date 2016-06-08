@@ -115,7 +115,7 @@ module Now
       end
 
       code = error_one2http(return_code.errno)
-      raise NowError.new(code: code, message: return_code.message)
+      raise NowError.new(code, return_code.message)
     end
 
   end

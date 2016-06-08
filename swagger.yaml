@@ -16,7 +16,7 @@ paths:
         default:
           description: "KO"
           schema:
-            $ref: "#/definitions/Error"
+            type: "string"
   /list:
     get:
       parameters: []
@@ -30,7 +30,7 @@ paths:
         default:
           description: "KO"
           schema:
-            $ref: "#/definitions/Error"
+            type: "string"
   /network/{id}:
     get:
       parameters:
@@ -48,7 +48,7 @@ paths:
         default:
           description: "KO"
           schema:
-            $ref: "#/definitions/Error"
+            type: "string"
 definitions:
   Network:
     type: "object"
@@ -61,15 +61,4 @@ definitions:
       title:
         type: "string"
       user:
-        type: "string"
-  Error:
-    type: "object"
-    required:
-    - "code"
-    - "message"
-    properties:
-      code:
-        type: "integer"
-        format: "int32"
-      message:
         type: "string"
