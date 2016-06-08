@@ -33,6 +33,12 @@ Style/DefWithParentheses:
 Style/EmptyLinesAroundClassBody:
   Enabled: false
 
+# Extra empty line detected at module body beginning
+# Extra empty line detected at module body end
+# (easy to read)
+Style/EmptyLinesAroundModuleBody:
+  Enabled: false
+
 # Favor modifier if usage when having a single-line body
 # (easy to read)
 Style/IfUnlessModifier:
