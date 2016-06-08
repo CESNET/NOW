@@ -3,10 +3,15 @@ all: run
 run: fetch
 	bundle exec rackup
 
-check:
-	:
+check: lint test
 
 fetch: Gemfile.lock
+
+lint:
+	rubocop
+
+test:
+	:
 
 clean:
 	rm -fv Gemfile.lock
@@ -14,4 +19,4 @@ clean:
 Gemfile.lock:
 	bundle install
 
-.PHONY: all check clean fetch run
+.PHONY: all check clean fetch lint test run

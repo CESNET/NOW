@@ -1,0 +1,69 @@
+AllCops:
+  DisplayCopNames: true
+  DisplayStyleGuide: true
+  Exclude:
+   # exclude generated code (maybe we'll rewrite it anyway one day)
+   - models/*.rb
+
+# Assignment Branch Condition size for initialize is too high
+# Perceived complexity for deep_merge is too high
+# Cyclomatic complexity for ... is too high
+# Line is too long
+# Method has too many lines
+# ...
+# (wtf)
+Metrics:
+  Enabled: false
+
+# Do not introduce global variables
+# (do want)
+Style/GlobalVars:
+  Exclude:
+    - config.ru
+    - lib/api.rb
+    - lib/nebula.rb
+
+# Omit the parentheses in defs when the method doesn't accept any arguments
+# (easy to read)
+Style/DefWithParentheses:
+  Enabled: false
+
+# Extra empty line detected at class body end
+# (easy to read)
+Style/EmptyLinesAroundClassBody:
+  Enabled: false
+
+# Favor modifier if usage when having a single-line body
+# (easy to read)
+Style/IfUnlessModifier:
+  Enabled: false
+
+# Missing space after #
+# (debugging)
+Style/LeadingCommentSpace:
+  Enabled: false
+
+# Do not use parentheses for method calls with no arguments
+# (easy to read)
+Style/MethodCallParentheses:
+  Enabled: false
+
+# Freeze mutable objects assigned to constants
+# (easy to read)
+Style/MutableConstant:
+  Enabled: false
+
+# Favor unless over if for negative conditions
+# (easy to read)
+Style/NegatedIf:
+  Enabled: false
+
+# Provide an exception class and message as arguments to raise
+# (wtf)
+Style/RaiseArgs:
+  Enabled: false
+
+# Redundant return detected
+# (easy to read)
+Style/RedundantReturn:
+  Enabled: false

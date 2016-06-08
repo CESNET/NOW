@@ -1,8 +1,8 @@
 require 'logger'
 
-Dir["./models/*.rb"].each { |file|
+Dir['./models/*.rb'].each do |file|
   require file
-}
+end
 require './version.rb'
 require './lib/nebula.rb'
 require './lib/api.rb'

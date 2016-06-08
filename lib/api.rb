@@ -1,10 +1,10 @@
 require 'json'
 require 'sinatra'
 require 'sinatra/cross_origin'
-require ::File.expand_path('../../version',  __FILE__)
+require ::File.expand_path('../../version', __FILE__)
 
 module Now
-
+  # HTTP REST API between NOW and rOCCI server
   class Application < Sinatra::Base
     attr_accessor :nebula
     register Sinatra::CrossOrigin
@@ -40,5 +40,4 @@ module Now
     end
 
   end
-
 end

@@ -3,24 +3,34 @@ require 'yaml'
 
 # http://stackoverflow.com/questions/9381553/ruby-merge-nested-hash
 public def deep_merge(second)
-   merger = proc { |key, v1, v2| Hash === v1 && Hash === v2 ? v1.merge(v2, &merger) : Array === v1 && Array === v2 ? v1 | v2 : [:undefined, nil, :nil].include?(v2) ? v1 : v2 }
-   self.merge(second.to_h, &merger)
+  merger = proc do |_key, v1, v2|
+    if [:undefined, nil, :nil].include?(v2)
+      v1
+    elsif [:undefined, nil, :nil].include?(v1)
+      v2
+    elsif v1.is_a?(Hash) && v2.is_a?(Hash)
+      v1.merge(v2, &merger)
+    elsif v1.is_a?(Array) && v2.is_a(Array)
+      v1 | v2
+    else
+      v2
+    end
+  end
+  merge(second.to_h, &merger)
 end
 
-
 module Now
+  # NOW core class for communication with OpenNebula
   class Nebula
     attr_accessor :config, :logger, :client
 
     def load_config(file)
-      begin
-        c = YAML.load_file(file)
-        @logger.debug "Config file '#{file}' loaded"
-        return c
-      rescue Errno::ENOENT
-        @logger.debug "Config file '#{file}' not found"
-        return {}
-      end
+      c = YAML.load_file(file)
+      @logger.debug "Config file '#{file}' loaded"
+      return c
+    rescue Errno::ENOENT
+      @logger.debug "Config file '#{file}' not found"
+      return {}
     end
 
     def one_connect(url, credentials)
@@ -41,8 +51,8 @@ module Now
       @config = @config.deep_merge(c)
       #@logger.debug "Configuration: #{@config}"
 
-      url = @config["opennebula"]["endpoint"]
-      credentials = "#{@config["opennebula"]["admin_user"]}:#{@config["opennebula"]["admin_password"]}"
+      url = @config['opennebula']['endpoint']
+      credentials = "#{@config['opennebula']['admin_user']}:#{@config['opennebula']['admin_password']}"
       one_connect(url, credentials)
     end
 
@@ -54,7 +64,7 @@ module Now
       vn_pool.each do |vn|
         id = vn.id
         title = vn.name
-        network = Network.new({id: id, title: title})
+        network = Network.new(id: id, title: title)
         networks << network.to_hash
       end
 
@@ -69,42 +79,44 @@ module Now
       id = vn.id
       title = vn.name
       @logger.debug "OpenNebula get(#{network_id}) ==> #{id}, #{title}"
-      network = Network.new({id: id, title: title})
+      network = Network.new(id: id, title: title)
 
       return network.to_hash
     end
 
     private
 
+    def error_one2http(errno)
+      case errno
+      when OpenNebula::Error::ESUCCESS
+        return 200
+      when OpenNebula::Error::EAUTHENTICATION
+        return 401
+      when OpenNebula::Error::EAUTHORIZATION
+        return 403
+      when OpenNebula::Error::ENO_EXISTS
+        return 404
+      when OpenNebula::Error::EXML_RPC_API
+        return 500
+      when OpenNebula::Error::EACTION
+        return 400
+      when OpenNebula::Error::EINTERNAL
+        return 500
+      when OpenNebula::Error::ENOTDEFINED
+        return 501
+      else
+        return 500
+      end
+    end
+
     def check(return_code)
       if !OpenNebula.is_error?(return_code)
         return true
       end
 
-      case return_code.errno
-        when OpenNebula::Error::ESUCCESS
-          code = 200
-        when OpenNebula::Error::EAUTHENTICATION
-          code = 401
-        when OpenNebula::Error::EAUTHORIZATION
-          code = 403
-        when OpenNebula::Error::ENO_EXISTS
-          code = 404
-        when OpenNebula::Error::EXML_RPC_API
-          code = 500
-        when OpenNebula::Error::EACTION
-          code = 400
-        when OpenNebula::Error::EINTERNAL
-          code = 500
-        when OpenNebula::Error::ENOTDEFINED
-          code = 501
-        else
-          code = 500
-      end
-
-      raise NowError.new({code: code, message: return_code.message})
+      code = error_one2http(return_code.errno)
+      raise NowError.new(code: code, message: return_code.message)
     end
 
   end
-
 end
