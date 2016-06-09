@@ -22,8 +22,6 @@ module Now
     before do
       # to sinatra request logger point to proper object
       env['rack.logger'] = $logger
-
-      switch_user(params['user'])
     end
 
     helpers do
@@ -44,6 +42,7 @@ module Now
     get '/list' do
       cross_origin
       begin
+        switch_user(params['user'])
         networks = @nebula.list_networks
         JSON.pretty_generate(networks)
       rescue NowError => e
@@ -55,6 +54,7 @@ module Now
     get '/network/:id' do
       cross_origin
       begin
+        switch_user(params['user'])
         network = @nebula.get(params['id'])
         JSON.pretty_generate(network)
       rescue NowError => e

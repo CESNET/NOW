@@ -11,7 +11,7 @@ lint:
 	rubocop
 
 test:
-	:
+	ruby -rminitest/autorun -Ilib:test -e 'Dir.glob "./test/*_test.rb", &method(:require)'
 
 clean:
 	rm -fv Gemfile.lock

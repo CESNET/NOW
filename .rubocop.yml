@@ -29,7 +29,7 @@ Style/FormatString:
 # (do want)
 Style/GlobalVars:
   Exclude:
-    - config.ru
+    - application.rb
     - lib/api.rb
     - lib/nebula.rb
 
