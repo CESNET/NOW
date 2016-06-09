@@ -20,44 +20,71 @@ public def deep_merge(second)
 end
 
 module Now
+
+  EXPIRE_LENGTH = 8 * 60 * 60
+
   # NOW core class for communication with OpenNebula
   class Nebula
-    attr_accessor :config, :logger, :client
+    attr_accessor :logger
+    @ctx = nil
+    @server_ctx = nil
+    @user_ctx = nil
 
     def load_config(file)
       c = YAML.load_file(file)
-      @logger.debug "Config file '#{file}' loaded"
+      logger.debug "Config file '#{file}' loaded"
       return c
     rescue Errno::ENOENT
-      @logger.debug "Config file '#{file}' not found"
+      logger.debug "Config file '#{file}' not found"
       return {}
     end
 
     def one_connect(url, credentials)
-      @logger.debug "Connecting to #{url}..."
-      @client = OpenNebula::Client.new(credentials, url)
+      logger.debug "Connecting to #{url} ..."
+      return OpenNebula::Client.new(credentials, url)
+    end
+
+    def switch_user(user)
+      admin_user = @config['opennebula']['admin_user']
+      admin_password = @config['opennebula']['admin_password']
+      logger.debug "Authentication from #{admin_user} to #{user}"
+
+      server_auth = ServerCipherAuth.new(admin_user, admin_password)
+      expiration = Time.now.to_i + EXPIRE_LENGTH
+      user_token = server_auth.login_token(expiration, user)
+
+      @user_ctx = one_connect(@url, user_token)
+      @ctx = @user_ctx
+    end
+
+    def switch_server()
+      admin_user = @config['opennebula']['admin_user']
+      admin_password = @config['opennebula']['admin_password']
+      logger.debug "Authentication to #{admin_user}"
+
+      direct_token = "#{admin_user}:#{admin_password}"
+      @server_ctx = one_connect(@url, direct_token)
+      @ctx = @server_ctx
     end
 
     def initialize()
       @logger = $logger
-      @logger.info "Starting Network Orchestrator Wrapper (NOW #{VERSION})"
+      logger.info "Starting Network Orchestrator Wrapper (NOW #{VERSION})"
       @config = {}
 
       c = load_config(::File.expand_path('../../etc/now.yaml', __FILE__))
       @config = @config.deep_merge(c)
-      #@logger.debug "Configuration: #{@config}"
+      #logger.debug "Configuration: #{@config}"
 
       c = load_config('/etc/now.yaml')
       @config = @config.deep_merge(c)
-      #@logger.debug "Configuration: #{@config}"
+      #logger.debug "Configuration: #{@config}"
 
-      url = @config['opennebula']['endpoint']
-      credentials = "#{@config['opennebula']['admin_user']}:#{@config['opennebula']['admin_password']}"
-      one_connect(url, credentials)
+      @url = @config['opennebula']['endpoint']
     end
 
     def list_networks()
-      vn_pool = OpenNebula::VirtualNetworkPool.new(client, -1)
+      vn_pool = OpenNebula::VirtualNetworkPool.new(@ctx, -1)
       check(vn_pool.info)
 
       networks = []
@@ -73,12 +100,12 @@ module Now
 
     def get(network_id)
       vn_generic = OpenNebula::VirtualNetwork.build_xml(network_id)
-      vn = OpenNebula::VirtualNetwork.new(vn_generic, @client)
+      vn = OpenNebula::VirtualNetwork.new(vn_generic, @ctx)
       check(vn.info)
 
       id = vn.id
       title = vn.name
-      @logger.debug "OpenNebula get(#{network_id}) ==> #{id}, #{title}"
+      logger.debug "OpenNebula get(#{network_id}) ==> #{id}, #{title}"
       network = Network.new(id: id, title: title)
 
       return network.to_hash

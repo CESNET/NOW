@@ -19,7 +19,12 @@ paths:
             type: "string"
   /list:
     get:
-      parameters: []
+      parameters:
+        - in: "query"
+          name: "user"
+          description: "OpenNebula user identity"
+          required: false
+          type: "string"
       responses:
         200:
           description: "List existing networks"
@@ -40,6 +45,11 @@ paths:
           required: true
           type: "integer"
           format: "int64"
+        - in: "query"
+          name: "user"
+          description: "OpenNebula user identity"
+          required: false
+          type: "string"
       responses:
         200:
           description: "Get information about network"

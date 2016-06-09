@@ -22,6 +22,18 @@ module Now
     before do
       # to sinatra request logger point to proper object
       env['rack.logger'] = $logger
+
+      switch_user(params['user'])
+    end
+
+    helpers do
+      def switch_user(user)
+        if user.nil?
+          @nebula.switch_server()
+        else
+          @nebula.switch_user(user)
+        end
+      end
     end
 
     get '/' do
@@ -35,6 +47,7 @@ module Now
         networks = @nebula.list_networks
         JSON.pretty_generate(networks)
       rescue NowError => e
+        logger.error "[HTTP #{e.code}] #{e.message}"
         halt e.code, e.message
       end
     end
@@ -45,6 +58,7 @@ module Now
         network = @nebula.get(params['id'])
         JSON.pretty_generate(network)
       rescue NowError => e
+        logger.error "[HTTP #{e.code}] #{e.message}"
         halt e.code, e.message
       end
     end

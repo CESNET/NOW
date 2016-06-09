@@ -15,6 +15,11 @@ AllCops:
 Metrics:
   Enabled: false
 
+# Use the return of the conditional for variable assignment and comparison
+# (wtf)
+Style/ConditionalAssignment:
+  Enabled: false
+
 # Favor format over sprintf
 # (easy to read)
 Style/FormatString:
