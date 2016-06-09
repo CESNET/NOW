@@ -15,6 +15,11 @@ AllCops:
 Metrics:
   Enabled: false
 
+# Favor format over sprintf
+# (easy to read)
+Style/FormatString:
+  Enabled: false
+
 # Do not introduce global variables
 # (do want)
 Style/GlobalVars:
