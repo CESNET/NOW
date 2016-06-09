@@ -14,6 +14,16 @@ module Now
       @nebula = $nebula
     end
 
+    configure do
+      enable :logging, :dump_errors
+      set :raise_errors, true
+    end
+
+    before do
+      # to sinatra request logger point to proper object
+      env['rack.logger'] = $logger
+    end
+
     get '/' do
       cross_origin
       API_VERSION
