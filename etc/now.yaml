@@ -1,4 +1,0 @@
-opennebula:
-  admin_user: oneadmin
-  admin_password: 'good-password'
-  endpoint: 'http://localhost:2633/RPC2'

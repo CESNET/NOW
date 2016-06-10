@@ -1,0 +1,4 @@
+opennebula:
+  admin_user: 'nowadmin'
+  admin_password: 'the-best-strongest-password-ever'
+  endpoint: http://localhost:2633/RPC2

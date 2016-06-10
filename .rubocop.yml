@@ -83,3 +83,8 @@ Style/RaiseArgs:
 # (easy to read)
 Style/RedundantReturn:
   Enabled: false
+
+# Avoid comma after the last item of an array
+# (do want)
+Style/TrailingCommaInLiteral:
+  Enabled: false
