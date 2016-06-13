@@ -10,7 +10,7 @@ At OpenNebula host:
     oneuser create nowadmin --driver server_cipher 'the-best-strongest-password-ever'
     oneuser chgrp nowadmin oneadmin
 
-At NOW host (configration `/etc/now.yaml`):
+At NOW host (configuration `/etc/now.yaml`):
 
     opennebula:
       admin_user: 'nowadmin'
@@ -29,13 +29,9 @@ List networks example:
 
 ## Development
 
-Using `make`:
-
-    make check
-    make run
-
-Or directly:
-
     bundle install
-    bundle exec rubocop
     bundle exec rackup
+
+### Testing
+
+See *.travis.yml*.
