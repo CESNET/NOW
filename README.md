@@ -29,6 +29,7 @@ List networks example:
 
 ## Development
 
+    export BUNDLE_GEMFILE=Gemfile.devel
     bundle install
     bundle exec rackup
 
