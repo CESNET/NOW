@@ -74,11 +74,6 @@ Style/MutableConstant:
 Style/NegatedIf:
   Enabled: false
 
-# Provide an exception class and message as arguments to raise
-# (wtf)
-Style/RaiseArgs:
-  Enabled: false
-
 # Redundant return detected
 # (easy to read)
 Style/RedundantReturn:

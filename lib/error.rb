@@ -2,11 +2,10 @@ module Now
 
   # The main exception class for NOW.
   class NowError < StandardError
-    attr_accessor :code, :message
+    attr_accessor :code
 
-    def initialize(code, message)
+    def initialize(code)
       @code = code
-      @message = message
     end
 
   end
