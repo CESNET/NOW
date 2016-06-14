@@ -33,11 +33,6 @@ Style/GlobalVars:
     - lib/api.rb
     - lib/nebula.rb
 
-# Omit the parentheses in defs when the method doesn't accept any arguments
-# (easy to read)
-Style/DefWithParentheses:
-  Enabled: false
-
 # Extra empty line detected at class body end
 # (easy to read)
 Style/EmptyLinesAroundClassBody:

@@ -44,7 +44,7 @@ module Now
       @ctx = @user_ctx
     end
 
-    def switch_server()
+    def switch_server
       admin_user = @config['opennebula']['admin_user']
       admin_password = @config['opennebula']['admin_password']
       logger.debug "Authentication to #{admin_user}"
@@ -54,7 +54,7 @@ module Now
       @ctx = @server_ctx
     end
 
-    def initialize()
+    def initialize
       @logger = $logger
       logger.info "Starting Network Orchestrator Wrapper (NOW #{VERSION})"
       @config = {}
@@ -70,7 +70,7 @@ module Now
       @url = @config['opennebula']['endpoint']
     end
 
-    def list_networks()
+    def list_networks
       vn_pool = OpenNebula::VirtualNetworkPool.new(@ctx, -1)
       check(vn_pool.info)
 
