@@ -4,27 +4,13 @@ require 'yaml'
 module Now
 
   EXPIRE_LENGTH = 8 * 60 * 60
-  CONFIG_FILES = [
-    ::File.expand_path('~/.config/now.yml'),
-    '/etc/now.yml',
-    ::File.expand_path('../../etc/now.yml', __FILE__),
-  ]
 
   # NOW core class for communication with OpenNebula
   class Nebula
-    attr_accessor :logger
+    attr_accessor :logger, :config
     @ctx = nil
     @server_ctx = nil
     @user_ctx = nil
-
-    def load_config(file)
-      c = YAML.load_file(file)
-      logger.debug "Config file '#{file}' loaded"
-      return c
-    rescue Errno::ENOENT
-      logger.debug "Config file '#{file}' not found"
-      return {}
-    end
 
     def one_connect(url, credentials)
       logger.debug "Connecting to #{url} ..."
@@ -32,8 +18,8 @@ module Now
     end
 
     def switch_user(user)
-      admin_user = @config['opennebula']['admin_user']
-      admin_password = @config['opennebula']['admin_password']
+      admin_user = config['opennebula']['admin_user']
+      admin_password = config['opennebula']['admin_password']
       logger.debug "Authentication from #{admin_user} to #{user}"
 
       server_auth = ServerCipherAuth.new(admin_user, admin_password)
@@ -45,8 +31,8 @@ module Now
     end
 
     def switch_server
-      admin_user = @config['opennebula']['admin_user']
-      admin_password = @config['opennebula']['admin_password']
+      admin_user = config['opennebula']['admin_user']
+      admin_password = config['opennebula']['admin_password']
       logger.debug "Authentication to #{admin_user}"
 
       direct_token = "#{admin_user}:#{admin_password}"
@@ -54,20 +40,14 @@ module Now
       @ctx = @server_ctx
     end
 
-    def initialize
+    def initialize(config)
       @logger = $logger
       logger.info "Starting Network Orchestrator Wrapper (NOW #{VERSION})"
-      @config = {}
 
-      CONFIG_FILES.each do |path|
-        if ::File.exist?(path)
-          @config = load_config(path)
-          break
-        end
-      end
-      logger.debug "Configuration: #{@config}"
+      @config = config
+      #logger.debug "[nebula] Configuration: #{config}"
 
-      @url = @config['opennebula']['endpoint']
+      @url = config['opennebula']['endpoint']
     end
 
     def list_networks

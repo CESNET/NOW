@@ -11,7 +11,7 @@ module Now
 
     def initialize
       super
-      @nebula = $nebula
+      @nebula = Now::Nebula.new($config)
     end
 
     configure do
@@ -27,9 +27,9 @@ module Now
     helpers do
       def switch_user(user)
         if user.nil?
-          @nebula.switch_server()
+          nebula.switch_server()
         else
-          @nebula.switch_user(user)
+          nebula.switch_user(user)
         end
       end
     end
@@ -43,7 +43,7 @@ module Now
       cross_origin
       begin
         switch_user(params['user'])
-        networks = @nebula.list_networks
+        networks = nebula.list_networks
         JSON.pretty_generate(networks)
       rescue NowError => e
         logger.error "[HTTP #{e.code}] #{e.message}"
@@ -55,7 +55,7 @@ module Now
       cross_origin
       begin
         switch_user(params['user'])
-        network = @nebula.get(params['id'])
+        network = nebula.get(params['id'])
         JSON.pretty_generate(network)
       rescue NowError => e
         logger.error "[HTTP #{e.code}] #{e.message}"

@@ -28,10 +28,7 @@ Style/FormatString:
 # Do not introduce global variables
 # (do want)
 Style/GlobalVars:
-  Exclude:
-    - application.rb
-    - lib/api.rb
-    - lib/nebula.rb
+  Enabled: false
 
 # Extra empty line detected at class body end
 # (easy to read)
