@@ -22,57 +22,28 @@ limitations under the License.
 require 'date'
 
 module Now
-  # Network object
-  class Network
-    # OpenNebula ID
-    attr_accessor :id
+  # Address range
+  class Range
+    # Address range (CIDR notation)
+    attr_accessor :address
 
-    # Network title
-    attr_accessor :title
-
-    # Network summary
-    attr_accessor :description
-
-    # Owner
-    attr_accessor :user
-
-    # VLAN ID
-    attr_accessor :vlan
-
-    attr_accessor :range
-
-    # Network state (active, inactive, error)
-    attr_accessor :state
-
-    # Availability zone (cluster)
-    attr_accessor :zone
+    # Address allocation type (static, dynamic)
+    attr_accessor :allocation
 
 
     # Attribute mapping from ruby-style variable name to JSON key.
     def self.attribute_map
       {
-        :'id' => :'id',
-        :'title' => :'title',
-        :'description' => :'description',
-        :'user' => :'user',
-        :'vlan' => :'vlan',
-        :'range' => :'range',
-        :'state' => :'state',
-        :'zone' => :'zone'
+        :'address' => :'address',
+        :'allocation' => :'allocation'
       }
     end
 
     # Attribute type mapping.
     def self.swagger_types
       {
-        :'id' => :'Integer',
-        :'title' => :'String',
-        :'description' => :'String',
-        :'user' => :'String',
-        :'vlan' => :'Integer',
-        :'range' => :'Range',
-        :'state' => :'String',
-        :'zone' => :'String'
+        :'address' => :'String',
+        :'allocation' => :'String'
       }
     end
 
@@ -84,36 +55,12 @@ module Now
       # convert string to symbol for hash key
       attributes = attributes.each_with_object({}){|(k,v), h| h[k.to_sym] = v}
 
-      if attributes.has_key?(:'id')
-        self.id = attributes[:'id']
+      if attributes.has_key?(:'address')
+        self.address = attributes[:'address']
       end
 
-      if attributes.has_key?(:'title')
-        self.title = attributes[:'title']
-      end
-
-      if attributes.has_key?(:'description')
-        self.description = attributes[:'description']
-      end
-
-      if attributes.has_key?(:'user')
-        self.user = attributes[:'user']
-      end
-
-      if attributes.has_key?(:'vlan')
-        self.vlan = attributes[:'vlan']
-      end
-
-      if attributes.has_key?(:'range')
-        self.range = attributes[:'range']
-      end
-
-      if attributes.has_key?(:'state')
-        self.state = attributes[:'state']
-      end
-
-      if attributes.has_key?(:'zone')
-        self.zone = attributes[:'zone']
+      if attributes.has_key?(:'allocation')
+        self.allocation = attributes[:'allocation']
       end
 
     end
@@ -128,7 +75,6 @@ module Now
     # Check to see if the all the properties in the model are valid
     # @return true if the model is valid
     def valid?
-      return false if @id.nil?
       return true
     end
 
@@ -137,14 +83,8 @@ module Now
     def ==(o)
       return true if self.equal?(o)
       self.class == o.class &&
-          id == o.id &&
-          title == o.title &&
-          description == o.description &&
-          user == o.user &&
-          vlan == o.vlan &&
-          range == o.range &&
-          state == o.state &&
-          zone == o.zone
+          address == o.address &&
+          allocation == o.allocation
     end
 
     # @see the `==` method
@@ -156,7 +96,7 @@ module Now
     # Calculates hash code according to all attributes.
     # @return [Fixnum] Hash code
     def hash
-      [id, title, description, user, vlan, range, state, zone].hash
+      [address, allocation].hash
     end
 
     # Builds the object from hash

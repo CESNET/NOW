@@ -6,7 +6,8 @@ info:
 paths:
   /:
     get:
-      description: "Simple check"
+      summary: "Simple service check"
+      description: "Simple service check. API version is returned."
       parameters: []
       responses:
         200:
@@ -17,8 +18,9 @@ paths:
           description: "KO"
           schema:
             type: "string"
-  /list:
+  /network:
     get:
+      summary: "Networks list"
       parameters:
         - in: "query"
           name: "user"
@@ -38,6 +40,7 @@ paths:
             type: "string"
   /network/{id}:
     get:
+      summary: "Information about network"
       parameters:
         - in: "path"
           name: "id"
@@ -60,15 +63,41 @@ paths:
           schema:
             type: "string"
 definitions:
+  Range:
+    description: "Address range"
+    type: "object"
+    properties:
+      address:
+        type: "string"
+        description: "Address range (CIDR notation)"
+      allocation:
+        description: "Address allocation type (static, dynamic)"
+        type: "string"
   Network:
+    description: "Network object"
     type: "object"
     required:
     - "id"
     properties:
       id:
+        description: "OpenNebula ID"
         type: "integer"
         format: "int64"
       title:
+        description: "Network title"
+        type: "string"
+      description:
+        description: "Network summary"
         type: "string"
       user:
+        description: "Owner"
+        type: "string"
+      vlan:
+        description: "VLAN ID"
+        type: "integer"
+        format: "int64"
+      range:
+        $ref: "#/definitions/Range"
+      zone:
+        description: "Availability zone (cluster)"
         type: "string"

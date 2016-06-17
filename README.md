@@ -25,7 +25,7 @@ Launch NOW:
 
 List networks example:
 
-    curl http://now.example.com:9292/list?user=myuser
+    curl http://now.example.com:9292/network?user=myuser
 
 ## Development
 

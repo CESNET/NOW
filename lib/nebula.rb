@@ -56,10 +56,12 @@ module Now
 
       networks = []
       vn_pool.each do |vn|
-        id = vn.id
-        title = vn.name
-        network = Network.new(id: id, title: title)
-        networks << network.to_hash
+        begin
+          network = parse_network(vn)
+          networks << network.to_hash
+        rescue NowError => e
+          logger.warn "[code #{e.code}] #{e.message}, skipping"
+        end
       end
 
       return networks
@@ -70,10 +72,7 @@ module Now
       vn = OpenNebula::VirtualNetwork.new(vn_generic, @ctx)
       check(vn.info)
 
-      id = vn.id
-      title = vn.name
-      logger.debug "OpenNebula get(#{network_id}) ==> #{id}, #{title}"
-      network = Network.new(id: id, title: title)
+      network = parse_network(vn)
 
       return network.to_hash
     end
@@ -110,6 +109,90 @@ module Now
 
       code = error_one2http(return_code.errno)
       raise NowError.new(code), return_code.message
+    end
+
+    def parse_range(vn_id, ar)
+      id = ar['AR_ID']
+      type = ar['TYPE']
+      size = ar['SIZE']
+      case type
+      when 'IP4'
+        ip = ar['IP']
+        addr_size = 32
+        if ip.nil? || ip.empty?
+          raise NowError.new(422), "Missing 'IP' in the address range #{id} of network #{vn_id}"
+        end
+      when 'IP6', 'IP4_6'
+        ip = ar['GLOBAL_PREFIX'] || ar['ULA_PREFIX']
+        addr_size = 128
+        if ip.nil? || ip.empty?
+          raise NowError.new(422), "Missing 'GLOBAL_PREFIX' in the address range #{id} of network #{vn_id}"
+        end
+      else
+        raise NowError.new(501), "Unknown type '#{type}' in the address range #{id} of network #{vn_id}"
+      end
+      if size.nil? || size.empty?
+        raise NowError.new(422), "Missing 'SIZE' in the address range #{id} of network #{vn_id}"
+      end
+      size = size.to_i
+      mask = addr_size - Math.log(size, 2).ceil
+      logger.debug "[parse_range] id=#{id}, address=#{ip}/#{mask} (size #{size})"
+
+      return Now::Range.new(address: "#{ip}/#{mask}", allocation: 'dynamic')
+    end
+
+    def parse_ranges(vn_id, vn)
+      range = nil
+      vn.each('AR_POOL/AR') do |ar|
+        if !range.nil?
+          raise NowError.new(501), "Multiple address ranges found in network #{vn_id}"
+        end
+        range = parse_range(vn_id, ar)
+      end
+      return range
+    end
+
+    def parse_cluster(vn_id, vn)
+      cluster = nil
+      vn.each('CLUSTERS/ID') do |cluster_xml|
+        id = cluster_xml.text
+        logger.debug "[parse_cluster] cluster: #{id}"
+        if !cluster.nil?
+          raise NowError.new(501), "Multiple clusters assigned to network #{vn_id}"
+        end
+        cluster = id
+      end
+      return cluster
+    end
+
+    def parse_network(vn)
+      logger.debug "[parse_network] #{vn.to_hash}"
+
+      id = vn.id
+      title = vn.name
+      desc = vn['SUMMARY']
+      if desc.nil? || desc.empty?
+        desc = nil
+      end
+      vlan = vn['VLAN_ID']
+      if vlan.nil? || vlan.empty?
+        vlan = nil
+      end
+
+      range = parse_ranges(id, vn)
+      zone = parse_cluster(id, vn)
+      network = Network.new(
+        id: id,
+        title: title,
+        description: desc,
+        user: vn['UNAME'],
+        bridge: vn['BRIDGE'],
+        vlan: vlan,
+        range: range,
+        zone: zone,
+      )
+
+      return network
     end
 
   end

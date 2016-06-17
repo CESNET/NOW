@@ -39,7 +39,7 @@ module Now
       API_VERSION
     end
 
-    get '/list' do
+    get '/network' do
       cross_origin
       begin
         switch_user(params['user'])
