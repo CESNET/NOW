@@ -10,4 +10,5 @@ rvm:
 
 script:
   - bundle exec rubocop
+  - bundle exec rspec
   - bundle exec ruby -rminitest/autorun -Ilib:test -e 'Dir.glob "./test/*_test.rb", &method(:require)'

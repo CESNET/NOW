@@ -1,10 +1,6 @@
 AllCops:
   DisplayCopNames: true
   DisplayStyleGuide: true
-  Exclude:
-   # exclude generated code (maybe we'll rewrite it anyway one day)
-   - models/network.rb
-   - models/range.rb
 
 # Assignment Branch Condition size for initialize is too high
 # Perceived complexity for deep_merge is too high

@@ -66,6 +66,8 @@ definitions:
   Range:
     description: "Address range"
     type: "object"
+    required:
+    - "address"
     properties:
       address:
         type: "string"
@@ -97,6 +99,7 @@ definitions:
         type: "integer"
         format: "int64"
       range:
+        description: "IP address range"
         $ref: "#/definitions/Range"
       zone:
         description: "Availability zone (cluster)"

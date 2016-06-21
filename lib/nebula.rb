@@ -1,5 +1,6 @@
 require 'opennebula'
 require 'yaml'
+require 'ipaddress'
 
 module Now
 
@@ -138,7 +139,7 @@ module Now
       mask = addr_size - Math.log(size, 2).ceil
       logger.debug "[parse_range] id=#{id}, address=#{ip}/#{mask} (size #{size})"
 
-      return Now::Range.new(address: "#{ip}/#{mask}", allocation: 'dynamic')
+      return Now::Range.new(address: IPAddress.parse("#{ip}/#{mask}"), allocation: 'dynamic')
     end
 
     def parse_ranges(vn_id, vn)
@@ -166,7 +167,7 @@ module Now
     end
 
     def parse_network(vn)
-      logger.debug "[parse_network] #{vn.to_hash}"
+      logger.debug "[parse_network] #{vn.to_xml}"
 
       id = vn.id
       title = vn.name

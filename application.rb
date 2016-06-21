@@ -1,6 +1,6 @@
 require 'logger'
 
-Dir['./models/*.rb'].each do |file|
+Dir['./models/helpers/*.rb', './models/*.rb'].each do |file|
   require file
 end
 require './version'
