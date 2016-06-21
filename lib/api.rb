@@ -44,7 +44,7 @@ module Now
       begin
         switch_user(params['user'])
         networks = nebula.list_networks
-        JSON.pretty_generate(networks)
+        JSON.pretty_generate(networks.map(&:to_hash))
       rescue NowError => e
         logger.error "[HTTP #{e.code}] #{e.message}"
         halt e.code, e.message
@@ -56,7 +56,7 @@ module Now
       begin
         switch_user(params['user'])
         network = nebula.get(params['id'])
-        JSON.pretty_generate(network)
+        JSON.pretty_generate(network.to_hash)
       rescue NowError => e
         logger.error "[HTTP #{e.code}] #{e.message}"
         halt e.code, e.message

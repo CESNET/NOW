@@ -59,7 +59,7 @@ module Now
       vn_pool.each do |vn|
         begin
           network = parse_network(vn)
-          networks << network.to_hash
+          networks << network
         rescue NowError => e
           logger.warn "[code #{e.code}] #{e.message}, skipping"
         end
@@ -75,7 +75,7 @@ module Now
 
       network = parse_network(vn)
 
-      return network.to_hash
+      return network
     end
 
     private
