@@ -1,26 +1,10 @@
 module Now
 
   # Generic hash class with custom accessors and helper methods
-  class NowHash < ::Hash
-    def self.my_accessor(*keys)
-      keys.each do |key|
-        define_method(key) do
-          return nil if !key?(key)
-          fetch(key)
-        end
-        define_method("#{key}=") do |new_value|
-          if new_value.nil?
-            delete(key)
-          else
-            store(key, new_value)
-          end
-        end
-      end
-    end
+  class NowObject
 
     def initialize(parameters = {})
-      parameters.select! { |_k, v| !v.nil? }
-      replace(parameters)
+      parameters.select { |_k, v| !v.nil? }.each_pair { |k, v| instance_variable_set("@#{k}", v) }
     end
 
     # Conversion of the data structure to hash. Arrays and hashes are browsed, the leafs are converted by calling to_hash method or directly copied.
@@ -29,8 +13,7 @@ module Now
     def _to_hash(value)
       if value.is_a?(Array)
         value.map { |v| _to_hash(v) }
-      # beware we're the Hash!!!
-      elsif value.is_a?(Hash) && !value.is_a?(Now::NowHash)
+      elsif value.is_a?(Hash)
         {}.tap do |hash|
           value.each { |k, v| hash[k] = _to_hash(v) }
         end
@@ -40,6 +23,7 @@ module Now
         value
       end
     end
+
   end
 
 end

@@ -3,41 +3,38 @@ require 'date'
 module Now
 
   # Network object
-  class Network < NowHash
+  class Network < NowObject
     # OpenNebula ID
-    my_accessor :id
+    attr_accessor :id
 
     # Network title
-    my_accessor :title
+    attr_accessor :title
 
     # Network summary
-    my_accessor :description
+    attr_accessor :description
 
     # Owner
-    my_accessor :user
+    attr_accessor :user
 
     # VLAN ID
-    my_accessor :vlan
+    attr_accessor :vlan
 
     # IP address range (reader)
-    def range
-      return nil if !key?(:range)
-      fetch(:range)
-    end
+    attr_reader :range
 
     # IP address range (writer)
     def range=(new_value)
       if !valid_range?(new_value)
         raise NowError.new(500), 'Invalid range type'
       end
-      store(:range, new_value)
+      @range = new_value
     end
 
     # Network state (active, inactive, error)
-    my_accessor :state
+    attr_accessor :state
 
     # Availability zone (cluster)
-    my_accessor :zone
+    attr_accessor :zone
 
     def initialize(parameters = {})
       if !parameters.key?(:id)
@@ -93,12 +90,15 @@ module Now
     # Returns the object in the form of hash
     # @return [Hash] Returns the object in the form of hash
     def to_hash
-      hash = {}
-      each_pair do |attr, value|
-        hash[attr] = _to_hash(value)
+      h = {}
+      [:id, :title, :description, :user, :vlan, :range, :state, :zone].each do |k|
+        v = instance_variable_get "@#{k}"
+        if !v.nil?
+          h[k] = _to_hash(v)
+        end
       end
 
-      return hash
+      return h
     end
 
     private

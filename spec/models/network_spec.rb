@@ -10,7 +10,7 @@ describe Now::Network do
     end
   end
 
-  context '#no addess range' do
+  context '#no address range' do
     let(:network) { Now::Network.new(id: 0) }
     let(:range) { Now::Range.new(address: IPAddress.parse('fd00::/8')) }
     let(:range2) { Now::Range.new(address: IPAddress.parse('fd00::/8')) }
@@ -38,7 +38,7 @@ describe Now::Network do
     it 'is valid' do
       expect(network.valid?).to be true
     end
-    it 'still valid with addess range' do
+    it 'still valid with address range' do
       network.range = range
       expect(network.valid?).to be true
     end

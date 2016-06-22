@@ -3,23 +3,21 @@ require 'ipaddress'
 module Now
 
   # Address range
-  class Range < NowHash
+  class Range < NowObject
 
     # Address range in CIDR notation (reader)
-    def address
-      fetch(:address)
-    end
+    attr_reader :address
 
     # Address range in CIDR notation (writer)
     def address=(new_value)
       if !valid_address?(new_value)
         raise NowError.new(500), 'Internal error: Invalid IP network address'
       end
-      store(:address, new_value)
+      @address = new_value
     end
 
     # Address allocation type (static, dynamic)
-    my_accessor :allocation
+    attr_accessor :allocation
 
     def initialize(parameters = {})
       if !parameters.key?(:address)
@@ -69,10 +67,10 @@ module Now
     # @return [Hash] Returns the object in the form of hash
     def to_hash
       h = {}
-      if key?(:address)
+      if !address.nil?
         h[:address] = "#{address}/#{address.prefix}"
       end
-      if key?(:allocation)
+      if !allocation.nil?
         h[:allocation] = allocation
       end
 
