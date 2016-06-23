@@ -1,0 +1,55 @@
+<VNET>
+  <ID>5</ID>
+  <UID>0</UID>
+  <GID>0</GID>
+  <UNAME>oneadmin</UNAME>
+  <GNAME>oneadmin</GNAME>
+  <NAME>dual</NAME>
+  <PERMISSIONS>
+    <OWNER_U>1</OWNER_U>
+    <OWNER_M>1</OWNER_M>
+    <OWNER_A>0</OWNER_A>
+    <GROUP_U>0</GROUP_U>
+    <GROUP_M>0</GROUP_M>
+    <GROUP_A>0</GROUP_A>
+    <OTHER_U>0</OTHER_U>
+    <OTHER_M>0</OTHER_M>
+    <OTHER_A>0</OTHER_A>
+  </PERMISSIONS>
+  <CLUSTERS>
+    <ID>0</ID>
+  </CLUSTERS>
+  <BRIDGE><![CDATA[br0]]></BRIDGE>
+  <PARENT_NETWORK_ID/>
+  <VN_MAD><![CDATA[vxlan]]></VN_MAD>
+  <PHYDEV><![CDATA[eth0]]></PHYDEV>
+  <VLAN_ID><![CDATA[666]]></VLAN_ID>
+  <VLAN_ID_AUTOMATIC>0</VLAN_ID_AUTOMATIC>
+  <USED_LEASES>0</USED_LEASES>
+  <VROUTERS/>
+  <TEMPLATE>
+    <BRIDGE><![CDATA[br0]]></BRIDGE>
+    <DESCRIPTION><![CDATA[Dual-stack test]]></DESCRIPTION>
+    <PHYDEV><![CDATA[eth0]]></PHYDEV>
+    <SECURITY_GROUPS><![CDATA[0]]></SECURITY_GROUPS>
+    <VLAN_ID><![CDATA[666]]></VLAN_ID>
+    <VN_MAD><![CDATA[vxlan]]></VN_MAD>
+  </TEMPLATE>
+  <AR_POOL>
+    <AR>
+      <AR_ID><![CDATA[1]]></AR_ID>
+      <IP><![CDATA[10.6.6.0]]></IP>
+      <MAC><![CDATA[02:66:60:52:01:01]]></MAC>
+      <SIZE><![CDATA[512]]></SIZE>
+      <TYPE><![CDATA[IP4_6]]></TYPE>
+      <ULA_PREFIX><![CDATA[fd00::]]></ULA_PREFIX>
+      <MAC_END><![CDATA[02:66:60:52:03:00]]></MAC_END>
+      <IP_END><![CDATA[10.6.7.255]]></IP_END>
+      <IP6_ULA><![CDATA[fd00::466:60ff:fe52:101]]></IP6_ULA>
+      <IP6_ULA_END><![CDATA[fd00::466:60ff:fe52:300]]></IP6_ULA_END>
+      <USED_LEASES>0</USED_LEASES>
+      <LEASES/>
+    </AR>
+  </AR_POOL>
+</VNET>
+

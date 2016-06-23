@@ -9,6 +9,8 @@ module Now
   # NOW core class for communication with OpenNebula
   class Nebula
     attr_accessor :logger, :config
+    # for testing
+    attr_accessor :ctx
     @ctx = nil
     @server_ctx = nil
     @user_ctx = nil
