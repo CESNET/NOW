@@ -5,6 +5,8 @@ describe 'network get' do
   net1 = l('network-example')
   net6a = l('network-ipv6-global')
   net6b = l('network-ipv6-local')
+  net_mask1 = l('network-mask1')
+  net_mask2 = l('network-mask2')
   nebula_base = Now::Nebula.new('opennebula' => { 'endpoint' => 'myendpoint' })
 
   context 'example' do
@@ -54,8 +56,6 @@ describe 'network get' do
 
       expect(network.id).to eq(id)
       expect(network.title).to eq('vx1')
-      #FIXME
-      pending('do not use size for netmask')
       expect(network.range).to eq(range)
     end
   end
@@ -76,7 +76,46 @@ describe 'network get' do
 
       expect(network.id).to eq(id)
       expect(network.title).to eq('vx2')
-      pending('do not use size for netmask')
+      expect(network.range).to eq(range)
+    end
+  end
+
+  context 'mask1' do
+    let(:client) do
+      instance_double('client', call: net_mask1)
+    end
+    let(:nebula) do
+      nebula_base.ctx = client
+      nebula_base
+    end
+    let(:id) { 0 }
+    let(:range) { Now::Range.new(address: IPAddress.parse('192.168.0.4/24'), allocation: 'dynamic') }
+
+    it 'get' do
+      network = nebula.get(id)
+
+      expect(network.id).to eq(id)
+      expect(network.title).to eq('example')
+      expect(network.range).to eq(range)
+    end
+  end
+
+  context 'mask2' do
+    let(:client) do
+      instance_double('client', call: net_mask2)
+    end
+    let(:nebula) do
+      nebula_base.ctx = client
+      nebula_base
+    end
+    let(:id) { 0 }
+    let(:range) { Now::Range.new(address: IPAddress.parse('192.168.0.4/24'), allocation: 'dynamic') }
+
+    it 'get' do
+      network = nebula.get(id)
+
+      expect(network.id).to eq(id)
+      expect(network.title).to eq('example')
       expect(network.range).to eq(range)
     end
   end

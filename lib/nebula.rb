@@ -114,44 +114,64 @@ module Now
       raise NowError.new(code), return_code.message
     end
 
-    def parse_range(vn_id, ar)
-      id = ar['AR_ID']
+    def parse_range(vn_id, vn, ar)
+      id = ar['AR_ID'] || '(undef)'
       type = ar['TYPE']
-      size = ar['SIZE']
+      ip = ar['NETWORK_ADDRESS'] || vn['NETWORK_ADDRESS']
+      mask = ar['NETWORK_MASK'] || vn['NETWORK_MASK']
+
       case type
       when 'IP4'
         ip = ar['IP']
-        addr_size = 32
         if ip.nil? || ip.empty?
           raise NowError.new(422), "Missing 'IP' in the address range #{id} of network #{vn_id}"
         end
+        address = IPAddress ip
+        if !ip.include? '/'
+          address.prefix = 24
+        end
       when 'IP6', 'IP4_6'
         ip = ar['GLOBAL_PREFIX'] || ar['ULA_PREFIX']
-        addr_size = 128
         if ip.nil? || ip.empty?
           raise NowError.new(422), "Missing 'GLOBAL_PREFIX' in the address range #{id} of network #{vn_id}"
         end
+        address = IPAddress ip
+        if !ip.include? '/'
+          address.prefix = 64
+        end
+      when nil
+        if ip.nil? || ip.empty?
+          raise NowError.new(422), "No address range and no NETWORK_ADDRESS in the network #{vn_id}"
+        end
+        address = IPAddress ip
       else
         raise NowError.new(501), "Unknown type '#{type}' in the address range #{id} of network #{vn_id}"
       end
-      if size.nil? || size.empty?
-        raise NowError.new(422), "Missing 'SIZE' in the address range #{id} of network #{vn_id}"
-      end
-      size = size.to_i
-      mask = addr_size - Math.log(size, 2).ceil
-      logger.debug "[parse_range] id=#{id}, address=#{ip}/#{mask} (size #{size})"
 
-      return Now::Range.new(address: IPAddress.parse("#{ip}/#{mask}"), allocation: 'dynamic')
+      # get the mask from NETWORK_MASK network parameter, if IP not in CIDR notation already
+      if !ip.include? '/'
+        if mask && !mask.empty?
+          if /\d+\.\d+\.\d+\.\d+/.match(mask)
+            address.netmask = mask
+          else
+            address.prefix = mask.to_i
+          end
+        end
+      end
+
+      logger.debug "[parse_range] network id=#{vn_id}, address=#{address.to_string}"
+      return Now::Range.new(address: address, allocation: 'dynamic')
     end
 
     def parse_ranges(vn_id, vn)
-      range = nil
-      vn.each('AR_POOL/AR') do |ar|
-        if !range.nil?
+      ar = nil
+      vn.each('AR_POOL/AR') do |a|
+        if !ar.nil?
           raise NowError.new(501), "Multiple address ranges found in network #{vn_id}"
         end
-        range = parse_range(vn_id, ar)
+        ar = a
       end
+      range = parse_range(vn_id, vn, ar)
       return range
     end
 
