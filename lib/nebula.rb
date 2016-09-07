@@ -3,7 +3,6 @@ require 'yaml'
 require 'ipaddress'
 
 module Now
-
   EXPIRE_LENGTH = 8 * 60 * 60
 
   # NOW core class for communication with OpenNebula
@@ -106,9 +105,7 @@ module Now
     end
 
     def check(return_code)
-      if !OpenNebula.is_error?(return_code)
-        return true
-      end
+      return true unless OpenNebula.is_error?(return_code)
 
       code = error_one2http(return_code.errno)
       raise NowError.new(code), return_code.message
@@ -127,18 +124,14 @@ module Now
           raise NowError.new(422), "Missing 'IP' in the address range #{id} of network #{vn_id}"
         end
         address = IPAddress ip
-        if !ip.include? '/'
-          address.prefix = 24
-        end
+        address.prefix = 24 unless ip.include? '/'
       when 'IP6', 'IP4_6'
         ip = ar['GLOBAL_PREFIX'] || ar['ULA_PREFIX']
         if ip.nil? || ip.empty?
           raise NowError.new(422), "Missing 'GLOBAL_PREFIX' in the address range #{id} of network #{vn_id}"
         end
         address = IPAddress ip
-        if !ip.include? '/'
-          address.prefix = 64
-        end
+        address.prefix = 64 unless ip.include? '/'
       when nil
         if ip.nil? || ip.empty?
           raise NowError.new(422), "No address range and no NETWORK_ADDRESS in the network #{vn_id}"
@@ -149,9 +142,9 @@ module Now
       end
 
       # get the mask from NETWORK_MASK network parameter, if IP not in CIDR notation already
-      if !ip.include? '/'
+      unless ip.include? '/'
         if mask && !mask.empty?
-          if /\d+\.\d+\.\d+\.\d+/.match(mask)
+          if /\d+\.\d+\.\d+\.\d+/ =~ mask
             address.netmask = mask
           else
             address.prefix = mask.to_i
@@ -166,7 +159,7 @@ module Now
     def parse_ranges(vn_id, vn)
       ar = nil
       vn.each('AR_POOL/AR') do |a|
-        if !ar.nil?
+        unless ar.nil?
           raise NowError.new(501), "Multiple address ranges found in network #{vn_id}"
         end
         ar = a
@@ -180,7 +173,7 @@ module Now
       vn.each('CLUSTERS/ID') do |cluster_xml|
         id = cluster_xml.text
         logger.debug "[parse_cluster] cluster: #{id}"
-        if !cluster.nil?
+        unless cluster.nil?
           raise NowError.new(501), "Multiple clusters assigned to network #{vn_id}"
         end
         cluster = id
@@ -194,13 +187,9 @@ module Now
       id = vn.id
       title = vn.name
       desc = vn['SUMMARY']
-      if desc.nil? || desc.empty?
-        desc = nil
-      end
+      desc && desc.empty? && desc = nil
       vlan = vn['VLAN_ID']
-      if vlan.nil? || vlan.empty?
-        vlan = nil
-      end
+      vlan && vlan.empty? && vlan = nil
 
       range = parse_ranges(id, vn)
       zone = parse_cluster(id, vn)
@@ -212,11 +201,10 @@ module Now
         bridge: vn['BRIDGE'],
         vlan: vlan,
         range: range,
-        zone: zone,
+        zone: zone
       )
 
       return network
     end
-
   end
 end

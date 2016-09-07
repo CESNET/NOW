@@ -27,7 +27,7 @@ module Now
     helpers do
       def switch_user(user)
         if user.nil?
-          nebula.switch_server()
+          nebula.switch_server
         else
           nebula.switch_user(user)
         end
@@ -62,6 +62,5 @@ module Now
         halt e.code, e.message
       end
     end
-
   end
 end

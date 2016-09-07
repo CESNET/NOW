@@ -28,17 +28,17 @@ module Now
     ###########################################################################
     # Constants with paths to relevant files and defaults
     ###########################################################################
-    CIPHER = 'aes-256-cbc'
+    CIPHER = 'aes-256-cbc'.freeze
 
     def initialize(srv_user, srv_passwd)
       @srv_user   = srv_user
       @srv_passwd = srv_passwd
 
-      if srv_passwd.nil? || srv_passwd.empty?
-        @key = ''
-      else
-        @key = ::Digest::SHA1.hexdigest(@srv_passwd)
-      end
+      @key = if srv_passwd.nil? || srv_passwd.empty?
+               ''
+             else
+               ::Digest::SHA1.hexdigest(@srv_passwd)
+             end
 
       @cipher = ::OpenSSL::Cipher::Cipher.new(CIPHER)
     end

@@ -12,35 +12,9 @@ AllCops:
 Metrics:
   Enabled: false
 
-# Use the return of the conditional for variable assignment and comparison
-# (wtf)
-Style/ConditionalAssignment:
-  Enabled: false
-
-# Favor format over sprintf
-# (easy to read)
-Style/FormatString:
-  Enabled: false
-
 # Do not introduce global variables
 # (do want)
 Style/GlobalVars:
-  Enabled: false
-
-# Extra empty line detected at class body end
-# (easy to read)
-Style/EmptyLinesAroundClassBody:
-  Enabled: false
-
-# Extra empty line detected at module body beginning
-# Extra empty line detected at module body end
-# (easy to read)
-Style/EmptyLinesAroundModuleBody:
-  Enabled: false
-
-# Favor modifier if usage when having a single-line body
-# (easy to read)
-Style/IfUnlessModifier:
   Enabled: false
 
 # Missing space after #
@@ -48,29 +22,9 @@ Style/IfUnlessModifier:
 Style/LeadingCommentSpace:
   Enabled: false
 
-# Do not use parentheses for method calls with no arguments
-# (easy to read)
-Style/MethodCallParentheses:
-  Enabled: false
-
-# Freeze mutable objects assigned to constants
-# (easy to read)
-Style/MutableConstant:
-  Enabled: false
-
-# Favor unless over if for negative conditions
-# (easy to read)
-Style/NegatedIf:
-  Enabled: false
-
 # Redundant return detected
 # (easy to read)
 Style/RedundantReturn:
-  Enabled: false
-
-# Avoid comma after the last parameter of a method call.
-# (do want)
-Style/TrailingCommaInArguments:
   Enabled: false
 
 # Avoid comma after the last item of an array

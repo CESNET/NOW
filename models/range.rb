@@ -1,16 +1,14 @@
 require 'ipaddress'
 
 module Now
-
   # Address range
   class Range < NowObject
-
     # Address range in CIDR notation (reader)
     attr_reader :address
 
     # Address range in CIDR notation (writer)
     def address=(new_value)
-      if !valid_address?(new_value)
+      unless valid_address?(new_value)
         raise NowError.new(500), 'Internal error: Invalid IP network address'
       end
       @address = new_value
@@ -20,10 +18,10 @@ module Now
     attr_accessor :allocation
 
     def initialize(parameters = {})
-      if !parameters.key?(:address)
+      unless parameters.key?(:address)
         raise NowError.new(500), 'Internal error: IP network address required'
       end
-      if !valid_address?(parameters[:address])
+      unless valid_address?(parameters[:address])
         raise NowError.new(500), 'Internal error: Invalid IP network address'
       end
       super
@@ -32,7 +30,7 @@ module Now
     # Check to see if the all the properties in the model are valid
     # @return true if the model is valid
     def valid?
-      return false if !valid_address?(address)
+      return false unless valid_address?(address)
       return true
     end
 
@@ -67,12 +65,8 @@ module Now
     # @return [Hash] Returns the object in the form of hash
     def to_hash
       h = {}
-      if !address.nil?
-        h[:address] = "#{address}/#{address.prefix}"
-      end
-      if !allocation.nil?
-        h[:allocation] = allocation
-      end
+      address.nil? || h[:address] = "#{address}/#{address.prefix}"
+      allocation.nil? || h[:allocation] = allocation
 
       return h
     end
@@ -82,7 +76,5 @@ module Now
     def valid_address?(value)
       !value.nil? && value.is_a?(IPAddress)
     end
-
   end
-
 end

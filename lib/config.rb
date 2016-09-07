@@ -2,12 +2,11 @@ require 'logger'
 require 'yaml'
 
 module Now
-
   CONFIG_FILES = [
     ::File.expand_path('~/.config/now.yml'),
     '/etc/now.yml',
     ::File.expand_path('../../etc/now.yml', __FILE__),
-  ]
+  ].freeze
 
   # Config class for NOW
   class Config < Hash
@@ -36,6 +35,5 @@ module Now
 
       replace config
     end
-
   end
 end

@@ -1,4 +1,4 @@
 module Now
-  VERSION = '0.0.1'
-  API_VERSION = '0.0.0'
+  VERSION = '0.0.1'.freeze
+  API_VERSION = '0.0.0'.freeze
 end

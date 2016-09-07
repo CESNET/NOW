@@ -1,8 +1,6 @@
 module Now
-
   # Generic hash class with custom accessors and helper methods
   class NowObject
-
     def initialize(parameters = {})
       parameters.select { |_k, v| !v.nil? }.each_pair { |k, v| instance_variable_set("@#{k}", v) }
     end
@@ -23,7 +21,5 @@ module Now
         value
       end
     end
-
   end
-
 end

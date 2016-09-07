@@ -11,5 +11,4 @@ class LaunchTest < Minitest::Test
     get '/'
     assert_equal Now::API_VERSION, last_response.body
   end
-
 end

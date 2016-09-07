@@ -1,7 +1,6 @@
 require 'date'
 
 module Now
-
   # Network object
   class Network < NowObject
     # OpenNebula ID
@@ -24,7 +23,7 @@ module Now
 
     # IP address range (writer)
     def range=(new_value)
-      if !valid_range?(new_value)
+      unless valid_range?(new_value)
         raise NowError.new(500), 'Invalid range type'
       end
       @range = new_value
@@ -37,7 +36,7 @@ module Now
     attr_accessor :zone
 
     def initialize(parameters = {})
-      if !parameters.key?(:id)
+      unless parameters.key?(:id)
         raise NowError.new(500), 'ID required in network object'
       end
       if parameters.key?(:range) && !valid_range?(parameters[:range])
@@ -50,7 +49,7 @@ module Now
     # @return true if the model is valid
     def valid?
       return false if id.nil?
-      return false if !valid_range?(range)
+      return false unless valid_range?(range)
       return true
     end
 
@@ -93,9 +92,7 @@ module Now
       h = {}
       [:id, :title, :description, :user, :vlan, :range, :state, :zone].each do |k|
         v = instance_variable_get "@#{k}"
-        if !v.nil?
-          h[k] = _to_hash(v)
-        end
+        v.nil? || h[k] = _to_hash(v)
       end
 
       return h
@@ -107,5 +104,4 @@ module Now
       value.nil? || value.is_a?(Now::Range)
     end
   end
-
 end
