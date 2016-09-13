@@ -5,8 +5,10 @@ gem 'opennebula'
 gem 'sinatra'
 gem 'sinatra-cross_origin'
 # recommended for sinatra
-gem 'thin'
+gem 'thin', require: false
 
+# for less insane requirements
+gem 'rack', "< 2.0.0", group: :development
 gem 'minitest', group: :development
 gem 'rack-test', group: :development
 gem 'rspec', group: :development
