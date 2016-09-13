@@ -1,7 +1,7 @@
-# Network Orchestrator
+# Network Orchestrator Wrapper
 
 ## Overview
-This is the component to extend OpenNebula network orchestration capabilities.
+Network Orchestrator Wrapper is the component to extend OpenNebula network orchestration capabilities.
 
 ## Admin Usage
 
