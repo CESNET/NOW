@@ -186,9 +186,9 @@ module Now
 
       id = vn.id
       title = vn.name
-      desc = vn['SUMMARY']
+      desc = vn['DESCRIPTION'] || vn['TEMPLATE/DESCRIPTION']
       desc && desc.empty? && desc = nil
-      vlan = vn['VLAN_ID']
+      vlan = vn['VLAN_ID'] || vn['TEMPLATE/VLAN_ID']
       vlan && vlan.empty? && vlan = nil
 
       range = parse_ranges(id, vn)
@@ -198,7 +198,7 @@ module Now
         title: title,
         description: desc,
         user: vn['UNAME'],
-        bridge: vn['BRIDGE'],
+        bridge: vn['BRIDGE'] || vn['TEMPLATE/BRIDGE'],
         vlan: vlan,
         range: range,
         zone: zone
