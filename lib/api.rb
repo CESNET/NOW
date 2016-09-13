@@ -86,5 +86,16 @@ module Now
         halt e.code, e.message
       end
     end
+
+    delete '/network/:id' do
+      cross_origin
+      begin
+        switch_user(params['user'])
+        nebula.delete_network(params['id'])
+      rescue NowError => e
+        logger.error "[HTTP #{e.code}] #{e.message}"
+        halt e.code, e.message
+      end
+    end
   end
 end

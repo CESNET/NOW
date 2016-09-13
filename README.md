@@ -25,14 +25,17 @@ Launch NOW:
 
 ## Usage
 
-List networks example:
+List networks:
 
  *curl http://now.example.com:9292/network?user=myuser*
 
-Create the network:
+Create network:
 
  *curl -i -X POST -d '{ "title": "example1", "description": "Example network", "range": { "address": "fc00::0001::/64", "allocation": "dynamic" }, "vlan": 1}' http://now.example.com:9292/network?user=myuser*
 
+Delete network:
+
+ *curl -i -X DELETE http://now.example.com:9292/network/1?user=myuser*
 
 ## Development
 

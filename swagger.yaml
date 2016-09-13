@@ -85,6 +85,27 @@ paths:
           description: "KO"
           schema:
             type: "string"
+    delete:
+      summary: "Delete network"
+      parameters:
+        - in: "path"
+          name: "id"
+          description: "Network ID"
+          required: true
+          type: "integer"
+          format: "int64"
+        - in: "query"
+          name: "user"
+          description: "OpenNebula user identity"
+          required: false
+          type: "string"
+      responses:
+        200:
+          description: "Network deleted"
+        default:
+          description: "KO"
+          schema:
+            type: "string"
 definitions:
   Range:
     description: "Address range"

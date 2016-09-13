@@ -105,9 +105,16 @@ module Now
 
       check(vn.allocate(template))
       id = vn.id.to_s
-      logger.debug "[create_network] created network: #{id}"
+      logger.info "[create_network] created network: #{id}"
 
       return id
+    end
+
+    def delete_network(network_id)
+      vn_generic = OpenNebula::VirtualNetwork.build_xml(network_id)
+      vn = OpenNebula::VirtualNetwork.new(vn_generic, @ctx)
+      check(vn.delete)
+      logger.info "[delete_network] deleted network: #{network_id}"
     end
 
     private
