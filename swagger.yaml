@@ -55,6 +55,8 @@ paths:
       responses:
         201:
           description: "Network created"
+          schema:
+            type: "string"
         default:
           description: "Error creating network"
           schema:
