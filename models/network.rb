@@ -36,10 +36,8 @@ module Now
     attr_accessor :zone
 
     def initialize(parameters = {})
-      unless parameters.key?(:id)
-        raise NowError.new(500), 'ID required in network object'
-      end
-      if parameters.key?(:range) && !valid_range?(parameters[:range])
+      range = parameters.key?(:range) && parameters[:range] || parameters.key?('range') && parameters['range']
+      if range && !valid_range?(range)
         raise NowError.new(500), 'Valid range object required in network object'
       end
       super
@@ -48,7 +46,6 @@ module Now
     # Check to see if the all the properties in the model are valid
     # @return true if the model is valid
     def valid?
-      return false if id.nil?
       return false unless valid_range?(range)
       return true
     end

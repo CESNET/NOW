@@ -18,10 +18,11 @@ module Now
     attr_accessor :allocation
 
     def initialize(parameters = {})
-      unless parameters.key?(:address)
+      address = parameters.key?(:address) && parameters[:address] || parameters.key?('address') && parameters['address']
+      unless address
         raise NowError.new(500), 'Internal error: IP network address required'
       end
-      unless valid_address?(parameters[:address])
+      unless valid_address?(address)
         raise NowError.new(500), 'Internal error: Invalid IP network address'
       end
       super
@@ -69,6 +70,20 @@ module Now
       allocation.nil? || h[:allocation] = allocation
 
       return h
+    end
+
+    # Build the object from hash
+    # @return [Now::Range] Returns the Now object of the address range
+    def self.from_hash(h = {})
+      p = {}
+
+      v = (h.key?('address') && h['address']) || (h.key?(:address) && h[:address])
+      p[:address] = IPAddress v if v
+
+      v = h.key?('allocation') && h['allocation'] || h.key?(:allocation) && h[:allocation]
+      p[:allocation] = v if v
+
+      new(p)
     end
 
     private
