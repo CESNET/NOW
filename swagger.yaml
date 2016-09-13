@@ -38,6 +38,27 @@ paths:
           description: "KO"
           schema:
             type: "string"
+    post:
+      summary: "Create a new network"
+      parameters:
+        - in: "query"
+          name: "user"
+          description: "OpenNebula user identity"
+          required: false
+          type: "string"
+        - in: "body"
+          name: "network"
+          description: "Network details"
+          required: true
+          schema:
+            $ref: "#/definitions/Network"
+      responses:
+        201:
+          description: "Network created"
+        default:
+          description: "Error creating network"
+          schema:
+            type: "string"
   /network/{id}:
     get:
       summary: "Information about network"
@@ -78,8 +99,6 @@ definitions:
   Network:
     description: "Network object"
     type: "object"
-    required:
-    - "id"
     properties:
       id:
         description: "OpenNebula ID"
@@ -99,7 +118,6 @@ definitions:
         type: "integer"
         format: "int64"
       range:
-        description: "IP address range"
         $ref: "#/definitions/Range"
       zone:
         description: "Availability zone (cluster)"

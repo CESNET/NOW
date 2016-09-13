@@ -1,0 +1,24 @@
+% if netinfo.title
+NAME = "<%= netinfo.title %>"
+% end
+
+% if netinfo.description
+DESCRIPTION = "<%= netinfo.description %>"
+% end
+
+% if netinfo.zone
+CLUSTERS = <%= netinfo.zone %>
+% end
+
+% if config.key? 'bridge'
+BRIDGE = <%= config['bridge'] %>
+% end
+
+% if config.key? 'device'
+PHYDEV = <%= config['device'] %>
+% end
+
+% if netinfo.vlan
+VLAN_ID = <%= netinfo.vlan %>
+VN_MAD = vxlan
+% end

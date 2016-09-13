@@ -4,7 +4,7 @@ require 'sinatra/cross_origin'
 require ::File.expand_path('../../version', __FILE__)
 
 module Now
-  # HTTP REST API between NOW and rOCCI server
+  # HTTP REST API of NOW (for usage by rOCCI server)
   class Application < Sinatra::Base
     attr_accessor :nebula
     register Sinatra::CrossOrigin
@@ -49,6 +49,30 @@ module Now
         logger.error "[HTTP #{e.code}] #{e.message}"
         halt e.code, e.message
       end
+    end
+
+    post '/network' do
+      cross_origin
+      request.body.rewind
+      begin
+        netinfo = JSON.parse request.body.read
+        switch_user(params['user'])
+        # Now::Network expects Now::Range object
+        if netinfo.key?('range')
+          netinfo['range'] = Now::Range.from_hash(netinfo['range'])
+        end
+        network = Now::Network.new(netinfo)
+        id = nebula.create_network(network)
+      rescue NowError => e
+        logger.error "[HTTP #{e.code}] #{e.message}"
+        halt e.code, e.message
+      rescue JSON::ParserError => e
+        logger.error "[HTTP 400] #{e.message}"
+        halt 400, e.message
+      end
+
+      body id
+      status 201
     end
 
     get '/network/:id' do

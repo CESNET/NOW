@@ -31,6 +31,7 @@ module Now
           break
         end
       end
+      config['template_dir'] = ::File.expand_path('../../templates', __FILE__)
       #logger.debug "[config] Configuration: #{config}"
 
       replace config

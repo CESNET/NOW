@@ -16,6 +16,8 @@ At NOW host (configuration `/etc/now.yaml`):
       admin_user: 'nowadmin'
       admin_password: 'the-best-strongest-password-ever'
       endpoint: http://nebula.example.com:2633/RPC2
+    bridge: br0
+    device: eth0
 
 Launch NOW:
 
@@ -25,7 +27,12 @@ Launch NOW:
 
 List networks example:
 
-    curl http://now.example.com:9292/network?user=myuser
+ *curl http://now.example.com:9292/network?user=myuser*
+
+Create the network:
+
+ *curl -i -X POST -d '{ "title": "example1", "description": "Example network", "range": { "address": "fc00::0001::/64", "allocation": "dynamic" }, "vlan": 1}' http://now.example.com:9292/network?user=myuser*
+
 
 ## Development
 

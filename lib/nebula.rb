@@ -1,3 +1,4 @@
+require 'erb'
 require 'opennebula'
 require 'yaml'
 require 'ipaddress'
@@ -11,6 +12,7 @@ module Now
     # for testing
     attr_accessor :ctx
     @ctx = nil
+    @user = nil
     @server_ctx = nil
     @user_ctx = nil
 
@@ -28,6 +30,7 @@ module Now
       expiration = Time.now.to_i + EXPIRE_LENGTH
       user_token = server_auth.login_token(expiration, user)
 
+      @user = user
       @user_ctx = one_connect(@url, user_token)
       @ctx = @user_ctx
     end
@@ -38,6 +41,7 @@ module Now
       logger.debug "Authentication to #{admin_user}"
 
       direct_token = "#{admin_user}:#{admin_password}"
+      @user = admin_user
       @server_ctx = one_connect(@url, direct_token)
       @ctx = @server_ctx
     end
@@ -79,6 +83,33 @@ module Now
       return network
     end
 
+    def create_network(netinfo)
+      #logger.debug "[create_network] #{netinfo}"
+      logger.info '[create_network] Network ID ignored (set by OpenNebula)' if netinfo.id
+      logger.info "[create_network] Network owner ignored (will be '#{@user}')" if netinfo.user
+      logger.warn '[create_network] Bridge not configured (bridge)' unless config.key? 'bridge'
+      logger.warn '[create_network] Physical drvice not configured (device)' unless config.key? 'device'
+      range = netinfo.range
+
+      if range && range.address && range.address.ipv6?
+        logger.warn "[create_network] Network prefix 64 for IPv6 network required (#{range.address.to_string})" unless range.address.prefix == 64
+      end
+      vn_generic = OpenNebula::VirtualNetwork.build_xml
+      vn = OpenNebula::VirtualNetwork.new(vn_generic, @ctx)
+      b = binding
+      template = ERB.new(::File.new(::File.join(config['template_dir'], 'network.erb')).read, 0, '%').result b
+      template_ar = ERB.new(::File.new(::File.join(config['template_dir'], 'range.erb')).read, 0, '%').result b
+      template += "\n"
+      template += template_ar
+      logger.debug "[create_network] template: #{template}"
+
+      check(vn.allocate(template))
+      id = vn.id.to_s
+      logger.debug "[create_network] created network: #{id}"
+
+      return id
+    end
+
     private
 
     def error_one2http(errno)
@@ -112,10 +143,10 @@ module Now
     end
 
     def parse_range(vn_id, vn, ar)
-      id = ar['AR_ID'] || '(undef)'
-      type = ar['TYPE']
-      ip = ar['NETWORK_ADDRESS'] || vn['NETWORK_ADDRESS']
-      mask = ar['NETWORK_MASK'] || vn['NETWORK_MASK']
+      id = ar && ar['AR_ID'] || '(undef)'
+      type = ar && ar['TYPE']
+      ip = ar && ar['NETWORK_ADDRESS'] || vn['NETWORK_ADDRESS']
+      mask = ar && ar['NETWORK_MASK'] || vn['NETWORK_MASK']
 
       case type
       when 'IP4'

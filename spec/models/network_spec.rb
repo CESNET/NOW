@@ -2,9 +2,6 @@ require 'spec_helper'
 
 describe Now::Network do
   context '#type check' do
-    it 'no id raises NowError' do
-      expect { Now::Network.new }.to raise_error(Now::NowError)
-    end
     it 'string range raises NowError' do
       expect { Now::Network.new(id: 0, range: 'eee') }.to raise_error(Now::NowError)
     end
