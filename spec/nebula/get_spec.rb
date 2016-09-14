@@ -7,7 +7,7 @@ describe 'network get' do
   net6b = l('network-ipv6-local')
   net_mask1 = l('network-mask1')
   net_mask2 = l('network-mask2')
-  nebula_base = Now::Nebula.new('opennebula' => { 'endpoint' => 'myendpoint' })
+  nebula_base = Now::Nebula.new($config)
 
   context 'example' do
     let(:client) do
