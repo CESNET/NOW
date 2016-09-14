@@ -55,20 +55,27 @@ module Now
       cross_origin
       request.body.rewind
       begin
-        netinfo = JSON.parse request.body.read
+        begin
+          netinfo = JSON.parse request.body.read
+        rescue JSON::ParserError => e
+          logger.error "[HTTP 400] #{e.message}"
+          halt 400, e.message
+        end
         switch_user(params['user'])
         # Now::Network expects Now::Range object
         if netinfo.key?('range')
-          netinfo['range'] = Now::Range.from_hash(netinfo['range'])
+          begin
+            netinfo['range'] = Now::Range.from_hash(netinfo['range'])
+          rescue ArgumentError => e
+            logger.error "[HTTP 400] #{e.message}"
+            halt 400, e.message
+          end
         end
         network = Now::Network.new(netinfo)
         id = nebula.create_network(network)
       rescue NowError => e
         logger.error "[HTTP #{e.code}] #{e.message}"
         halt e.code, e.message
-      rescue JSON::ParserError => e
-        logger.error "[HTTP 400] #{e.message}"
-        halt 400, e.message
       end
 
       body id
