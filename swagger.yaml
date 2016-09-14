@@ -119,6 +119,9 @@ definitions:
       allocation:
         description: "Address allocation type (static, dynamic)"
         type: "string"
+      gateway:
+        type: "string"
+        description: "Gateway address"
   Network:
     description: "Network object"
     type: "object"

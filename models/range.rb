@@ -17,6 +17,17 @@ module Now
     # Address allocation type (static, dynamic)
     attr_accessor :allocation
 
+    # Gateway address (reader)
+    attr_accessor :gateway
+
+    # Gateway address (writer)
+    def gateway=(new_value)
+      unless valid_address?(new_value)
+        raise NowError.new(500), 'Internal error: Invalid IP address of gateway'
+      end
+      @gateway = new_value
+    end
+
     def initialize(parameters = {})
       address = parameters.key?(:address) && parameters[:address] || parameters.key?('address') && parameters['address']
       unless address
@@ -25,6 +36,10 @@ module Now
       unless valid_address?(address)
         raise NowError.new(500), 'Internal error: Invalid IP network address'
       end
+      gateway = parameters.key?(:gateway) && parameters[:gateway] || parameters.key?('gateway') && parameters['gateway']
+      if gateway && !valid_address?(gateway)
+        raise NowError.new(500), 'Internal error: Invalid IP address of gateway'
+      end
       super
     end
 
@@ -32,6 +47,7 @@ module Now
     # @return true if the model is valid
     def valid?
       return false unless valid_address?(address)
+      return false if gateway && !valid_address?(gateway)
       return true
     end
 
@@ -41,7 +57,8 @@ module Now
       return true if equal?(other)
       self.class == other.class &&
         address == other.address &&
-        allocation == other.allocation
+        allocation == other.allocation &&
+        gateway == other.gateway
     end
 
     # @see the `==` method
@@ -53,7 +70,7 @@ module Now
     # Calculates hash code according to all attributes.
     # @return [Fixnum] Hash code
     def hash
-      [address, allocation].hash
+      [address, allocation, gateway].hash
     end
 
     # Returns the string representation of the object
@@ -68,6 +85,7 @@ module Now
       h = {}
       address.nil? || h[:address] = "#{address}/#{address.prefix}"
       allocation.nil? || h[:allocation] = allocation
+      gateway.nil? || h[:gateway] = gateway.to_s
 
       return h
     end
@@ -82,6 +100,9 @@ module Now
 
       v = h.key?('allocation') && h['allocation'] || h.key?(:allocation) && h[:allocation]
       p[:allocation] = v if v
+
+      v = (h.key?('gateway') && h['gateway']) || (h.key?(:gateway) && h[:gateway])
+      p[:gateway] = IPAddress v if v
 
       new(p)
     end

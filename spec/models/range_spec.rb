@@ -11,8 +11,8 @@ describe Now::Range do
   end
 
   context '#basic' do
-    let(:range) { Now::Range.new(address: IPAddress.parse('192.168.0.1/24')) }
-    let(:hash) { { address: '192.168.0.1/24' } }
+    let(:range) { Now::Range.new(address: IPAddress.parse('192.168.0.1/24'), gateway: IPAddress.parse('192.168.0.1')) }
+    let(:hash) { { address: '192.168.0.1/24', gateway: '192.168.0.1' } }
 
     it 'is a range' do
       expect(range).to be_kind_of Now::Range
