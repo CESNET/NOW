@@ -87,8 +87,8 @@ module Now
       #logger.debug "[create_network] #{netinfo}"
       logger.info '[create_network] Network ID ignored (set by OpenNebula)' if netinfo.id
       logger.info "[create_network] Network owner ignored (will be '#{@user}')" if netinfo.user
-      logger.warn '[create_network] Bridge not configured (bridge)' unless config.key? 'bridge'
-      logger.warn '[create_network] Physical drvice not configured (device)' unless config.key? 'device'
+      logger.warn '[create_network] Bridge not configured (BRIDGE)' unless config.key?('network') && config['network'].key?('BRIDGE')
+      logger.warn '[create_network] Physical device not configured (PHYDEV)' unless config.key?('network') && config['network'].key?('PHYDEV')
       range = netinfo.range
 
       if range && range.address && range.address.ipv6?
@@ -96,11 +96,40 @@ module Now
       end
       vn_generic = OpenNebula::VirtualNetwork.build_xml
       vn = OpenNebula::VirtualNetwork.new(vn_generic, @ctx)
+
+      attributes = {}
+      attributes.merge!(config['network']) if config.key? 'network'
+      attributes['NAME'] = netinfo.title if netinfo.title
+      attributes['DESCRIPTION'] = netinfo.description if netinfo.description
+      attributes['CLUSTERS'] = netinfo.zone if netinfo.zone
+      attributes['VLAN_ID'] = netinfo.vlan if netinfo.vlan
+      attributes['VN_MAD'] = 'vxlan'
+      if range
+        address = range.address
+        attributes['GATEWAY'] = range.gateway if range.gateway
+        attributes['NETWORK_ADDRESS'] = address.network.to_s
+        attributes['NETWORK_MASK'] = address.netmask if address.ipv4?
+        attributes['NETWORK_MASK'] = address.prefix if address.ipv6?
+      end
+
+      rattributes = {}
+      if range && range.address.ipv4?
+        rattributes['TYPE'] = 'IP4'
+        rattributes['IP'] = range.address.first.to_s
+        rattributes['SIZE'] = range.address.size - 2
+      end
+      if range && range.address.ipv6?
+        rattributes['TYPE'] = 'IP6'
+        if IPAddress('fc00::/7').include? range.address
+          rattributes['ULA_PREFIX'] = range.address.network.to_s
+        else
+          rattributes['GLOBAL_PREFIX'] = range.address.network.to_s
+        end
+        rattributes['SIZE'] = range.address.size >= 2**31 ? 2**31 : range.address.size - 2
+      end
+
       b = binding
       template = ERB.new(::File.new(::File.join(config['template_dir'], 'network.erb')).read, 0, '%').result b
-      template_ar = ERB.new(::File.new(::File.join(config['template_dir'], 'range.erb')).read, 0, '%').result b
-      template += "\n"
-      template += template_ar
       logger.debug "[create_network] template: #{template}"
 
       check(vn.allocate(template))
@@ -152,8 +181,9 @@ module Now
     def parse_range(vn_id, vn, ar)
       id = ar && ar['AR_ID'] || '(undef)'
       type = ar && ar['TYPE']
-      ip = ar && ar['NETWORK_ADDRESS'] || vn['NETWORK_ADDRESS']
-      mask = ar && ar['NETWORK_MASK'] || vn['NETWORK_MASK']
+      gateway = ar && ar['GATEWAY'] || vn['TEMPLATE/GATEWAY']
+      ip = ar && ar['NETWORK_ADDRESS'] || vn['TEMPLATE/NETWORK_ADDRESS']
+      mask = ar && ar['NETWORK_MASK'] || vn['TEMPLATE/NETWORK_MASK']
 
       case type
       when 'IP4'
@@ -190,8 +220,14 @@ module Now
         end
       end
 
-      logger.debug "[parse_range] network id=#{vn_id}, address=#{address.to_string}"
-      return Now::Range.new(address: address, allocation: 'dynamic')
+      gateway = IPAddress gateway if gateway
+
+      if gateway
+        logger.debug "[#{__method__}] network id=#{vn_id}, address=#{address.to_string}, gateway=#{gateway}"
+      else
+        logger.debug "[#{__method__}] network id=#{vn_id}, address=#{address.to_string}"
+      end
+      return Now::Range.new(address: address, allocation: 'dynamic', gateway: gateway)
     end
 
     def parse_ranges(vn_id, vn)

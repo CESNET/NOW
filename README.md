@@ -16,8 +16,11 @@ At NOW host (configuration `/etc/now.yaml`):
       admin_user: 'nowadmin'
       admin_password: 'the-best-strongest-password-ever'
       endpoint: http://nebula.example.com:2633/RPC2
-    bridge: br0
-    device: eth0
+    # custom parameters for new user networks
+    # (PHYDEV and BRIDGE are required)
+    network:
+      BRIDGE: br0
+      PHYDEV: eth0
 
 Launch NOW:
 

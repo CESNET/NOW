@@ -17,7 +17,7 @@ describe 'network get' do
       nebula_base.ctx = client
       nebula_base
     end
-    let(:range) { Now::Range.new(address: IPAddress.parse('192.168.0.4/24'), allocation: 'dynamic') }
+    let(:range) { Now::Range.new(address: IPAddress.parse('192.168.0.4/24'), allocation: 'dynamic', gateway: IPAddress.parse('192.168.0.1')) }
 
     it 'get raw' do
       vn_generic = OpenNebula::VirtualNetwork.build_xml(0)
@@ -89,7 +89,7 @@ describe 'network get' do
       nebula_base
     end
     let(:id) { 0 }
-    let(:range) { Now::Range.new(address: IPAddress.parse('192.168.0.4/24'), allocation: 'dynamic') }
+    let(:range) { Now::Range.new(address: IPAddress.parse('192.168.0.4/24'), allocation: 'dynamic', gateway: IPAddress.parse('192.168.0.1')) }
 
     it 'get' do
       network = nebula.get(id)
@@ -109,7 +109,7 @@ describe 'network get' do
       nebula_base
     end
     let(:id) { 0 }
-    let(:range) { Now::Range.new(address: IPAddress.parse('192.168.0.4/24'), allocation: 'dynamic') }
+    let(:range) { Now::Range.new(address: IPAddress.parse('192.168.0.4/24'), allocation: 'dynamic', gateway: IPAddress.parse('192.168.0.1')) }
 
     it 'get' do
       network = nebula.get(id)
