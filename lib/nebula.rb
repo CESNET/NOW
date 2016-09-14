@@ -115,7 +115,7 @@ module Now
       rattributes = {}
       if range && range.address.ipv4?
         rattributes['TYPE'] = 'IP4'
-        rattributes['IP'] = range.address.first.to_s
+        rattributes['IP'] = range.address.to_s
         rattributes['SIZE'] = range.address.size - 2
       end
       if range && range.address.ipv6?
