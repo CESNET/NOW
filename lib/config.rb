@@ -31,6 +31,10 @@ module Now
           break
         end
       end
+      # super_user defaults to admin_user
+      if config.key?('opennebula') && config['opennebula'].key?('admin_user')
+        config['opennebula']['super_user'] ||= config['opennebula']['admin_user']
+      end
       config['template_dir'] = ::File.expand_path('../../templates', __FILE__)
       #logger.debug "[config] Configuration: #{config}"
 

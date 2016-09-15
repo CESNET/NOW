@@ -22,3 +22,17 @@ $config = {
   },
   'template_dir' => ::File.expand_path('../../templates', __FILE__),
 }
+
+module Now
+  class Nebula
+    def fake_ctx(ctx)
+      @ctx = ctx
+    end
+
+    def fake_authz(user, operations, vlans)
+      @authz = operations
+      @authz_vlan = vlans
+      @user = user
+    end
+  end
+end

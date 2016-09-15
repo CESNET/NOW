@@ -24,16 +24,6 @@ module Now
       env['rack.logger'] = $logger
     end
 
-    helpers do
-      def switch_user(user)
-        if user.nil?
-          nebula.switch_server
-        else
-          nebula.switch_user(user)
-        end
-      end
-    end
-
     get '/' do
       cross_origin
       API_VERSION
@@ -42,7 +32,7 @@ module Now
     get '/network' do
       cross_origin
       begin
-        switch_user(params['user'])
+        nebula.init_authz(params['user'], Set[:get])
         networks = nebula.list_networks
         JSON.pretty_generate(networks.map(&:to_hash))
       rescue NowError => e
@@ -61,7 +51,6 @@ module Now
           logger.error "[HTTP 400] #{e.message}"
           halt 400, e.message
         end
-        switch_user(params['user'])
         # Now::Network expects Now::Range object
         if netinfo.key?('range')
           begin
@@ -71,6 +60,7 @@ module Now
             halt 400, e.message
           end
         end
+        nebula.init_authz(params['user'], Set[:create])
         network = Now::Network.new(netinfo)
         id = nebula.create_network(network)
       rescue NowError => e
@@ -85,7 +75,7 @@ module Now
     get '/network/:id' do
       cross_origin
       begin
-        switch_user(params['user'])
+        nebula.init_authz(params['user'], Set[:get])
         network = nebula.get(params['id'])
         JSON.pretty_generate(network.to_hash)
       rescue NowError => e
@@ -97,7 +87,7 @@ module Now
     delete '/network/:id' do
       cross_origin
       begin
-        switch_user(params['user'])
+        nebula.init_authz(params['user'], Set[:delete])
         nebula.delete_network(params['id'])
       rescue NowError => e
         logger.error "[HTTP #{e.code}] #{e.message}"

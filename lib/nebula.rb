@@ -9,41 +9,48 @@ module Now
   # NOW core class for communication with OpenNebula
   class Nebula
     attr_accessor :logger, :config
-    # for testing
-    attr_accessor :ctx
+    @authz = nil
+    @authz_vlan = nil
     @ctx = nil
     @user = nil
-    @server_ctx = nil
-    @user_ctx = nil
 
     def one_connect(url, credentials)
       logger.debug "Connecting to #{url} ..."
       return OpenNebula::Client.new(credentials, url)
     end
 
+    # Connect to OpenNebula as given user
+    #
+    # There are two modes:
+    #
+    # 1) admin_user with server_cipher driver is required and any user must be specified
+    #
+    # 2) admin_user with regular password is required and user may not be specified,
+    #    impersonation is not possible, so admin_user must have enough rights to read everything
+    #
+    # In multi-user environment choice 1) with impersonation is needed.
+    #
+    # @param user [String] user name (nil for direct login as admin_user)
     def switch_user(user)
       admin_user = config['opennebula']['admin_user']
       admin_password = config['opennebula']['admin_password']
-      logger.debug "Authentication from #{admin_user} to #{user}"
 
-      server_auth = ServerCipherAuth.new(admin_user, admin_password)
-      expiration = Time.now.to_i + EXPIRE_LENGTH
-      user_token = server_auth.login_token(expiration, user)
+      if user
+        logger.debug "Authentication from #{admin_user} to #{user}"
 
-      @user = user
-      @user_ctx = one_connect(@url, user_token)
-      @ctx = @user_ctx
-    end
+        server_auth = ServerCipherAuth.new(admin_user, admin_password)
+        expiration = Time.now.to_i + EXPIRE_LENGTH
+        user_token = server_auth.login_token(expiration, user)
 
-    def switch_server
-      admin_user = config['opennebula']['admin_user']
-      admin_password = config['opennebula']['admin_password']
-      logger.debug "Authentication to #{admin_user}"
+        @user = user
+        @ctx = one_connect(@url, user_token)
+      else
+        logger.debug "Authentication to #{admin_user}"
 
-      direct_token = "#{admin_user}:#{admin_password}"
-      @user = admin_user
-      @server_ctx = one_connect(@url, direct_token)
-      @ctx = @server_ctx
+        direct_token = "#{admin_user}:#{admin_password}"
+        @user = admin_user
+        @ctx = one_connect(@url, direct_token)
+      end
     end
 
     def initialize(config)
@@ -56,7 +63,39 @@ module Now
       @url = config['opennebula']['endpoint']
     end
 
+    # Fetch data needed for authorization decisions and connect to OpenNebula
+    # under specified user.
+    #
+    # @param user [String] user name (nil for direct login as admin_user)
+    # @param operations [Set] planned operations: :create, :update, :delete, :get
+    def init_authz(user, operations)
+      # only create and update operation needs to fetch information about networks
+      enable_authz = !(Set[:create, :update] & operations).empty?
+
+      if enable_authz
+        logger.debug "[#{__method__}] extended authorization needed, data will be fetched"
+
+        # impersonation not possible when using direct login
+        super_user = (config['opennebula']['super_user'] if user)
+        switch_user(super_user)
+
+        @authz = Set[:get]
+        @authz_vlan = {}
+        list_networks.each do |n|
+          # VLAN explicitly as string to reliable compare
+          @authz_vlan[n.vlan.to_s] = n.user if n.vlan
+        end
+        logger.debug "[#{__method__}] scanned VLANs: #{@authz_vlan}"
+      else
+        logger.debug "[#{__method__}] extended authorization not needed for #{op2str operations}"
+      end
+
+      switch_user(user) if user || !enable_authz
+      @authz = operations
+    end
+
     def list_networks
+      authz(Set[:get], nil)
       vn_pool = OpenNebula::VirtualNetworkPool.new(@ctx, -1)
       check(vn_pool.info)
 
@@ -74,6 +113,7 @@ module Now
     end
 
     def get(network_id)
+      authz(Set[:get], nil)
       vn_generic = OpenNebula::VirtualNetwork.build_xml(network_id)
       vn = OpenNebula::VirtualNetwork.new(vn_generic, @ctx)
       check(vn.info)
@@ -84,6 +124,7 @@ module Now
     end
 
     def create_network(netinfo)
+      authz(Set[:create], netinfo)
       #logger.debug "[create_network] #{netinfo}"
       logger.info '[create_network] Network ID ignored (set by OpenNebula)' if netinfo.id
       logger.info "[create_network] Network owner ignored (will be '#{@user}')" if netinfo.user
@@ -140,6 +181,7 @@ module Now
     end
 
     def delete_network(network_id)
+      authz(Set[:delete], nil)
       vn_generic = OpenNebula::VirtualNetwork.build_xml(network_id)
       vn = OpenNebula::VirtualNetwork.new(vn_generic, @ctx)
       check(vn.delete)
@@ -147,6 +189,48 @@ module Now
     end
 
     private
+
+    # Check authorization
+    #
+    # Raised error if not passed.
+    #
+    # Most of the authorization is up to OpenNebula. NOW component only check
+    # if one user doesn't user other users' VLAN ID.
+    #
+    # @param operations [Set] operations to perform (:get, :create, :modify, :delete)
+    # @param network [Now::Network] network (for :create and :modify)
+    def authz(operations, network)
+      if network && network.vlan
+        logger.debug "[#{__method__}] checking VLAN #{network.vlan}, operations #{op2str operations}"
+      else
+        logger.debug "[#{__method__}] checking operations #{op2str operations}"
+      end
+      raise NowError.new(500), 'NOW authorization not initialized' unless @authz
+
+      missing = operations - @authz
+      raise NowError.new(500), "NOW authorization not enabled for operations #{op2str missing}" unless missing.empty?
+
+      operations &= Set[:create, :update]
+      if !operations.empty? && network.vlan
+        # VLAN explicitly as string to reliable compare
+        network.vlan = network.vlan.to_s
+        if @authz_vlan.key?(network.vlan)
+          owner = @authz_vlan[network.vlan]
+          logger.debug "[#{__method__}] for VLAN #{network.vlan} found owner #{owner}"
+          raise NowError.new(403), "Not authorized to use VLAN #{network.vlan} for operations #{op2str operations}" if owner != @user
+        else
+          logger.debug "[#{__method__}] VLAN #{network.vlan} is free"
+        end
+      end
+    end
+
+    def op2str(operations)
+      if operations
+        operations.to_a.sort.join ', '
+      else
+        '(none)'
+      end
+    end
 
     def error_one2http(errno)
       case errno
