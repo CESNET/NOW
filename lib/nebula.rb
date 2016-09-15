@@ -272,7 +272,6 @@ module Now
         title: title,
         description: desc,
         user: vn['UNAME'],
-        bridge: vn['BRIDGE'] || vn['TEMPLATE/BRIDGE'],
         vlan: vlan,
         range: range,
         zone: zone
