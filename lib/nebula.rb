@@ -423,7 +423,7 @@ module Now
     end
 
     def raw2template_range(range, rattributes)
-      return nil unless range
+      return '' unless range
 
       if range.address.ipv4?
         rattributes['TYPE'] = 'IP4'
