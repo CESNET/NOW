@@ -405,7 +405,8 @@ module Now
       attributes['VN_MAD'] = 'vxlan'
       if range
         address = range.address
-        attributes['GATEWAY'] = range.gateway if range.gateway
+        attributes['GATEWAY'] = range.gateway if range.gateway && address.ipv4?
+        attributes['GATEWAY6'] = range.gateway if range.gateway && address.ipv6?
         attributes['NETWORK_ADDRESS'] = address.network.to_s
         attributes['NETWORK_MASK'] = address.netmask if address.ipv4?
         attributes['NETWORK_MASK'] = address.prefix if address.ipv6?

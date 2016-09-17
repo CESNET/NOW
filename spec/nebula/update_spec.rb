@@ -40,7 +40,6 @@ describe 'network update' do
         expect(client).to receive('call').with('vn.info', net_id)
         expect(client).to receive('call').with('vn.rename', net_id, 'New title')
         expect(client).to receive('call').with('vn.update_ar', net_id, /ULA_PREFIX\s*=\s*fc00:42::,?\n/)
-        pending
         expect(client).to receive('call').with('vn.update', net_id, /GATEWAY6\s*=\s*fc00:42::1:1,?\s*\n/, 1)
         id = nebula.update_network(net_id, network6)
         expect(id).to eq(net_id.to_s)
