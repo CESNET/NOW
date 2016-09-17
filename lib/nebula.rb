@@ -113,6 +113,7 @@ module Now
     end
 
     def get(network_id)
+      logger.debug "[#{__method__}] #{network_id}"
       authz(Set[:get], nil)
       vn_generic = OpenNebula::VirtualNetwork.build_xml(network_id)
       vn = OpenNebula::VirtualNetwork.new(vn_generic, @ctx)
@@ -123,7 +124,7 @@ module Now
 
     def create_network(netinfo)
       authz(Set[:create], netinfo)
-      #logger.debug "[create_network] #{netinfo}"
+      logger.debug "[#{__method__}] #{netinfo}"
       logger.info "[#{__method__}] Network ID ignored (set by OpenNebula)" if netinfo.id
       logger.info "[#{__method__}] Network owner ignored (will be '#{@user}')" if netinfo.user
       logger.warn "[#{__method__}] Bridge not configured (BRIDGE)" unless config.key?('network') && config['network'].key?('BRIDGE')
@@ -147,11 +148,12 @@ module Now
     end
 
     def delete_network(network_id)
+      logger.debug "[#{__method__}] #{network_id}"
       authz(Set[:delete], nil)
       vn_generic = OpenNebula::VirtualNetwork.build_xml(network_id)
       vn = OpenNebula::VirtualNetwork.new(vn_generic, @ctx)
       check(vn.delete)
-      logger.info "[delete_network] deleted network: #{network_id}"
+      logger.info "[#{__method__}] deleted network: #{network_id}"
     end
 
     # Update OpenNebula network
@@ -164,6 +166,7 @@ module Now
     # @param network_id [String] OpenNebula network ID
     # @param netinfo [Now::Network] sparse network structure with attributes to modify
     def update_network(network_id, netinfo)
+      logger.debug "[#{__method__}] #{network_id}, #{netinfo}"
       authz(Set[:update], netinfo)
       #logger.debug "[#{__method__}] #{netinfo}"
       logger.info "[#{__method__}] Network ID ignored (got from URL)" if netinfo.id
@@ -356,7 +359,7 @@ module Now
       cluster = nil
       vn.each('CLUSTERS/ID') do |cluster_xml|
         id = cluster_xml.text
-        logger.debug "[parse_cluster] cluster: #{id}"
+        logger.debug "[#{__method__}] cluster: #{id}"
         unless cluster.nil?
           raise NowError.new(501), "Multiple clusters assigned to network #{vn_id}"
         end
