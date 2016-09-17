@@ -22,11 +22,6 @@ Style/GlobalVars:
 Style/LeadingCommentSpace:
   Enabled: false
 
-# Redundant return detected
-# (easy to read)
-Style/RedundantReturn:
-  Enabled: false
-
 # Avoid comma after the last item of an array
 # (do want)
 Style/TrailingCommaInLiteral:

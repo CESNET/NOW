@@ -46,8 +46,7 @@ module Now
     # Check to see if the all the properties in the model are valid
     # @return true if the model is valid
     def valid?
-      return false unless valid_range?(range)
-      return true
+      valid_range?(range)
     end
 
     # Checks equality by comparing each attribute.
@@ -103,7 +102,7 @@ module Now
         v.nil? || h[k] = _to_hash(v)
       end
 
-      return h
+      h
     end
 
     private

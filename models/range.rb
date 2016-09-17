@@ -48,7 +48,7 @@ module Now
     def valid?
       return false unless valid_address?(address)
       return false if gateway && !valid_address?(gateway)
-      return true
+      true
     end
 
     # Checks equality by comparing each attribute.
@@ -87,7 +87,7 @@ module Now
       allocation.nil? || h[:allocation] = allocation
       gateway.nil? || h[:gateway] = gateway.to_s
 
-      return h
+      h
     end
 
     # Build the object from hash

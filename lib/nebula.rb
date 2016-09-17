@@ -16,7 +16,7 @@ module Now
 
     def one_connect(url, credentials)
       logger.debug "Connecting to #{url} ..."
-      return OpenNebula::Client.new(credentials, url)
+      OpenNebula::Client.new(credentials, url)
     end
 
     # Connect to OpenNebula as given user
@@ -109,7 +109,7 @@ module Now
         end
       end
 
-      return networks
+      networks
     end
 
     def get(network_id)
@@ -118,9 +118,7 @@ module Now
       vn = OpenNebula::VirtualNetwork.new(vn_generic, @ctx)
       check(vn.info)
 
-      network = parse_network(vn)
-
-      return network
+      parse_network(vn)
     end
 
     def create_network(netinfo)
@@ -145,7 +143,7 @@ module Now
       id = vn.id.to_s
       logger.info "[#{__method__}] created network: #{id}"
 
-      return id
+      id
     end
 
     def delete_network(network_id)
@@ -210,7 +208,7 @@ module Now
       id = vn.id.to_s
       logger.info "[#{__method__}] updated network: #{id}"
 
-      return id
+      id
     end
 
     private
@@ -340,7 +338,7 @@ module Now
       else
         logger.debug "[#{__method__}] network id=#{vn_id}, address=#{address.to_string}"
       end
-      return Now::Range.new(address: address, allocation: 'dynamic', gateway: gateway)
+      Now::Range.new(address: address, allocation: 'dynamic', gateway: gateway)
     end
 
     def parse_ranges(vn_id, vn)
@@ -351,8 +349,7 @@ module Now
         end
         ar = a
       end
-      range = parse_range(vn_id, vn, ar)
-      return range
+      parse_range(vn_id, vn, ar)
     end
 
     def parse_cluster(vn_id, vn)
@@ -365,7 +362,7 @@ module Now
         end
         cluster = id
       end
-      return cluster
+      cluster
     end
 
     def parse_network(vn)
@@ -391,7 +388,7 @@ module Now
       )
       logger.debug "[#{__method__}] #{network}"
 
-      return network
+      network
     end
 
     def raw2template_network(netinfo, attributes, old_vn)
