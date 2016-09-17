@@ -106,6 +106,35 @@ paths:
           description: "KO"
           schema:
             type: "string"
+    put:
+      summary: "Modify network"
+      parameters:
+        - in: "path"
+          name: "id"
+          description: "Network ID"
+          required: true
+          type: "integer"
+          format: "int64"
+        - in: "query"
+          name: "user"
+          description: "OpenNebula user identity"
+          required: false
+          type: "string"
+        - in: "body"
+          name: "network"
+          description: "Network details"
+          required: true
+          schema:
+            $ref: "#/definitions/Network"
+      responses:
+        200:
+          description: "Network modified"
+          schema:
+            type: "string"
+        default:
+          description: "Error creating network"
+          schema:
+            type: "string"
 definitions:
   Range:
     description: "Address range"

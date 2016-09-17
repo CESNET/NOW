@@ -49,6 +49,10 @@ Delete network:
 
  *curl -i -X DELETE http://now.example.com:9292/network/1?user=myuser*
 
+Update network (VLAN ID change not supported):
+
+ *curl -i -X PUT -d '{ "title": "New Title", "description": "New description", "range": { "address": "fc00:42::/64", "gateway": "fc00:42::1:1"}}" http://now.example.com:9292/network/42?user=myuser*
+
 ## Development
 
     export BUNDLE_GEMFILE=Gemfile.devel

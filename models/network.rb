@@ -77,6 +77,17 @@ module Now
       [id, title, description, user, vlan, range, state, zone].hash
     end
 
+    def merge!(other)
+      @id = other.id if other.id
+      @title = other.title if other.title
+      @description = other.description if other.description
+      @user = other.user if other.user
+      @vlan = other.vlan if other.vlan
+      @range = other.range if other.range
+      @state = other.state if other.state
+      @zone = other.zone if other.zone
+    end
+
     # Returns the string representation of the object
     # @return [String] String presentation of the object
     def to_s

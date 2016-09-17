@@ -94,5 +94,35 @@ module Now
         halt e.code, e.message
       end
     end
+
+    put '/network/:id' do
+      cross_origin
+      request.body.rewind
+      begin
+        begin
+          netinfo = JSON.parse request.body.read
+        rescue JSON::ParserError => e
+          logger.error "[HTTP 400] #{e.message}"
+          halt 400, e.message
+        end
+        # Now::Network expects Now::Range object
+        if netinfo.key?('range')
+          begin
+            netinfo['range'] = Now::Range.from_hash(netinfo['range'])
+          rescue ArgumentError => e
+            logger.error "[HTTP 400] #{e.message}"
+            halt 400, e.message
+          end
+        end
+        nebula.init_authz(params['user'], Set[:update])
+        network = Now::Network.new(netinfo)
+        id = nebula.update_network(params['id'], network)
+      rescue NowError => e
+        logger.error "[HTTP #{e.code}] #{e.message}"
+        halt e.code, e.message
+      end
+
+      body id
+    end
   end
 end
