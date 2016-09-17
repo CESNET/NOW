@@ -23,12 +23,13 @@ module Now
     #
     # There are two modes:
     #
-    # 1) admin_user with server_cipher driver is required and any user must be specified
+    # 1) admin_user with server_cipher driver and user must be specified in query parameter
     #
-    # 2) admin_user with regular password is required and user may not be specified,
-    #    impersonation is not possible, so admin_user must have enough rights to read everything
+    # 2) admin_user with regular password and user may not be specified
+    #    Impersonation is not possible, so admin_user must be the same as super_user
+    #    (=must have enough rights to read everything).
     #
-    # In multi-user environment choice 1) with impersonation is needed.
+    # In multi-user environment the choice 1) is needed.
     #
     # @param user [String] user name (nil for direct login as admin_user)
     def switch_user(user)
@@ -94,6 +95,7 @@ module Now
       @authz = operations
     end
 
+    # List all accessible OpenNebula networks
     def list_networks
       authz(Set[:get], nil)
       vn_pool = OpenNebula::VirtualNetworkPool.new(@ctx, -1)
@@ -112,6 +114,9 @@ module Now
       networks
     end
 
+    # Get information about OpenNebula network
+    #
+    # @param network_id [String] OpenNebula network ID
     def get(network_id)
       logger.debug "[#{__method__}] #{network_id}"
       authz(Set[:get], nil)
@@ -122,6 +127,9 @@ module Now
       parse_network(vn)
     end
 
+    # Create OpenNebula network
+    #
+    # @param netinfo [Now::Network] network to create
     def create_network(netinfo)
       authz(Set[:create], netinfo)
       logger.debug "[#{__method__}] #{netinfo}"
@@ -147,6 +155,9 @@ module Now
       id
     end
 
+    # Delete OpenNebula network
+    #
+    # @param network_id [String] OpenNebula network ID
     def delete_network(network_id)
       logger.debug "[#{__method__}] #{network_id}"
       authz(Set[:delete], nil)
@@ -158,10 +169,14 @@ module Now
 
     # Update OpenNebula network
     #
-    # Only name and address range can be modified by regular users.
+    # Limitations from OpenNebula:
     #
-    # All NOW-managed networks already has address range. If not, update will try to add it, but
-    # that requires ADMIN NET privilege.
+    # 1) Only name and address range can be modified by regular users
+    #
+    # 2) Changing IP address type between IPv4/IPv6 doesn't work
+    #
+    # 3) All NOW-managed networks already has address range. If not, update will try to add it, but
+    #    that requires additional ADMIN NET privilege.
     #
     # @param network_id [String] OpenNebula network ID
     # @param netinfo [Now::Network] sparse network structure with attributes to modify
