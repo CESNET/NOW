@@ -50,7 +50,7 @@ describe 'network get' do
       nebula_base
     end
     let(:id) { 2 }
-    let(:range) { Now::Range.new(address: IPAddress.parse('2001:718:1801:1052::/64'), allocation: 'dynamic') }
+    let(:range) { Now::Range.new(address: IPAddress.parse('2001:718:1801:1052::/64'), allocation: 'dynamic', gateway: IPAddress.parse('2001:718:1801:1052::1:1')) }
 
     it 'get' do
       network = nebula.get(id)
@@ -70,7 +70,7 @@ describe 'network get' do
       nebula_base
     end
     let(:id) { 3 }
-    let(:range) { Now::Range.new(address: IPAddress.parse('fd00::/64'), allocation: 'dynamic') }
+    let(:range) { Now::Range.new(address: IPAddress.parse('fd00::/64'), allocation: 'dynamic', gateway: IPAddress.parse('fd00::1:1')) }
 
     it 'get' do
       network = nebula.get(id)

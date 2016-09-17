@@ -34,6 +34,7 @@
     <SECURITY_GROUPS><![CDATA[0]]></SECURITY_GROUPS>
     <VLAN_ID><![CDATA[666]]></VLAN_ID>
     <VN_MAD><![CDATA[vxlan]]></VN_MAD>
+    <GATEWAY6><![CDATA[fd00::1:1]]></GATEWAY6>
   </TEMPLATE>
   <AR_POOL>
     <AR>

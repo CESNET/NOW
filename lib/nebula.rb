@@ -291,8 +291,6 @@ module Now
     def parse_range(vn_id, vn, ar)
       id = ar && ar['AR_ID'] || '(undef)'
       type = ar && ar['TYPE']
-      gateway = ar && ar['GATEWAY']
-      gateway = vn['TEMPLATE/GATEWAY'] if !gateway || gateway.empty?
       ip = ar && ar['NETWORK_ADDRESS']
       ip = vn['TEMPLATE/NETWORK_ADDRESS'] if !ip || ip.empty?
       mask = ar && ar['NETWORK_MASK']
@@ -306,6 +304,10 @@ module Now
         end
         address = IPAddress ip
         address.prefix = 24 unless ip.include? '/'
+
+        gateway = ar && ar['GATEWAY']
+        gateway = vn['TEMPLATE/GATEWAY'] if !gateway || gateway.empty?
+
       when 'IP6', 'IP4_6'
         ip = ar['GLOBAL_PREFIX']
         ip = ar['ULA_PREFIX'] if !ip || ip.empty?
@@ -314,6 +316,10 @@ module Now
         end
         address = IPAddress ip
         address.prefix = 64 unless ip.include? '/'
+
+        gateway = ar && ar['GATEWAY6']
+        gateway = vn['TEMPLATE/GATEWAY6'] if !gateway || gateway.empty?
+
       when nil
         if ip.nil? || ip.empty?
           raise NowError.new(422), "No address range and no NETWORK_ADDRESS in the network #{vn_id}"
@@ -334,9 +340,8 @@ module Now
         end
       end
 
-      gateway = IPAddress gateway if gateway
-
       if gateway
+        gateway = IPAddress gateway if gateway
         logger.debug "[#{__method__}] network id=#{vn_id}, address=#{address.to_string}, gateway=#{gateway}"
       else
         logger.debug "[#{__method__}] network id=#{vn_id}, address=#{address.to_string}"
