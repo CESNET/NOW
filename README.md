@@ -7,19 +7,19 @@ Network Orchestrator Wrapper is the component to extend OpenNebula network orche
 
 ### At OpenNebula host
 
-Users need permission to create networks.
+Users need permissions to manage networks (see [OpenNebula API documentation](http://docs.opennebula.org/stable/integration/system_interfaces/api.html#onevnet)).
 
 NOW needs service admin account(s):
 
     # admin user for impersonation
     oneuser create nowadmin --driver server_cipher 'the-best-strongest-password-ever'
     oneuser chgrp nowadmin oneadmin
-    # admin user to read everything (in all users groups)
+    # admin user to read everything (in all users groups), it may be different account
     oneuser addgroup nowadmin users
 
 ### At NOW host
 
-Cconfiguration is `/etc/now.yaml` or `~/.config/now.yaml`:
+Configuration is `/etc/now.yaml` or `~/.config/now.yaml`:
 
     opennebula:
       # admin user used as service account for impersonation
@@ -59,7 +59,7 @@ Authorization is not handled by NOW component. User identity is part of the URL 
 
 ### Update network
 
-Change of the OpenNebula internal attributes are not supported by NOW (VLAN ID, PHYDEV, BRIGDE). OpenNebula support changing them only under *oneadmin* user or group.
+Change of the OpenNebula internal attributes are not supported by NOW (VLAN ID, PHYDEV, BRIDGE). OpenNebula permits changing them only under *oneadmin* user or group.
 
  *curl -i -X PUT -d '{ "title": "New Title", "description": "New description", "range": { "address": "fc00:42::/64", "gateway": "fc00:42::1:1"}}" http://now.example.com:9292/network/42?user=myuser*
 
