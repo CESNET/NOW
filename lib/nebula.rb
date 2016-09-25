@@ -415,7 +415,7 @@ module Now
     def raw2template_network(netinfo, attributes, old_vn)
       range = netinfo.range
 
-      attributes.merge!(config['network']) if config.key? 'network'
+      attributes.merge!(config['network']) if config.key?('network') && config['network']
       attributes['NAME'] = netinfo.title if netinfo.title
       attributes['DESCRIPTION'] = netinfo.description if netinfo.description
       attributes['CLUSTERS'] = netinfo.zone if netinfo.zone
