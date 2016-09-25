@@ -135,10 +135,8 @@ module Now
       logger.debug "[#{__method__}] #{netinfo}"
       logger.info "[#{__method__}] Network ID ignored (set by OpenNebula)" if netinfo.id
       logger.info "[#{__method__}] Network owner ignored (will be '#{@user}')" if netinfo.user
-      logger.warn "[#{__method__}] Bridge not configured (BRIDGE)" unless config.key?('network') && config['network'].key?('BRIDGE')
-      logger.warn "[#{__method__}] Physical device not configured (PHYDEV)" unless config.key?('network') && config['network'].key?('PHYDEV')
-      range = netinfo.range
 
+      range = netinfo.range
       if range && range.address && range.address.ipv6?
         logger.warn "[#{__method__}] Network prefix 64 for IPv6 network required (#{range.address.to_string})" unless range.address.prefix == 64
       end
@@ -422,7 +420,6 @@ module Now
       attributes['DESCRIPTION'] = netinfo.description if netinfo.description
       attributes['CLUSTERS'] = netinfo.zone if netinfo.zone
       attributes['VLAN_ID'] = netinfo.vlan if netinfo.vlan
-      attributes['VN_MAD'] = 'vxlan'
       if range
         address = range.address
         attributes['GATEWAY'] = range.gateway if range.gateway && address.ipv4?

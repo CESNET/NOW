@@ -46,9 +46,11 @@ Configuration is `/etc/now.yaml` or `~/.config/now.yaml`:
       # only read permission is needed (defaults to admin_user)
       super_user: 'nowadmin'
 
-    # custom parameters for new user networks
-    # (PHYDEV or BRIDGE are required)
+    # parameters for new user networks:
+    # * VN_MAD is required
+    # * PHYDEV or BRIDGE are required for 'vxlan'
     network:
+      VN_MAD: vxlan
       BRIDGE: br0
       PHYDEV: eth0
 
