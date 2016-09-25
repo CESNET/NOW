@@ -9,12 +9,24 @@ Network Orchestrator Wrapper is the component to extend OpenNebula network orche
 
 Users need permissions to manage networks (see [OpenNebula API documentation](http://docs.opennebula.org/stable/integration/system_interfaces/api.html#onevnet)).
 
+For example using a group (users need to be added to it):
+
+    onegroup create --name network --resources NET
+
+Or add ACLs manually (where *groupid* is any users group id number):
+
+    groupid=1
+    zone='#0'
+    oneacl create "@${groupid} NET/* CREATE ${zone}"
+    oneacl create "@${groupid} CLUSTER/* ADMIN ${zone}"
+
 NOW needs service admin account(s):
 
     # admin user for impersonation
     oneuser create nowadmin --driver server_cipher 'the-best-strongest-password-ever'
     oneuser chgrp nowadmin oneadmin
-    # admin user to read everything (in all users groups), it may be different account
+    # admin user to read everything (it must be in all users groups or have
+    # proper ACLs), it may be different account
     oneuser addgroup nowadmin users
 
 ### At NOW host
@@ -35,7 +47,7 @@ Configuration is `/etc/now.yaml` or `~/.config/now.yaml`:
       super_user: 'nowadmin'
 
     # custom parameters for new user networks
-    # (PHYDEV and BRIDGE are required)
+    # (PHYDEV or BRIDGE are required)
     network:
       BRIDGE: br0
       PHYDEV: eth0
@@ -43,7 +55,10 @@ Configuration is `/etc/now.yaml` or `~/.config/now.yaml`:
 ## Usage
 Interface is described in *swagger.yaml*.
 
-Authorization is not handled by NOW component. User identity is part of the URL query. NOW will impersonate this user using the configured service admin account.
+Neither authentization or authorization is handled by NOW component, only checks for VLAN ID is performed by NOW.
+
+User identity is part of the URL query. NOW will impersonate this user using the configured service admin account. This way the authorization is delegated to OpenNebula.
+
 
 ### List networks
 
@@ -51,7 +66,7 @@ Authorization is not handled by NOW component. User identity is part of the URL 
 
 ### Create network
 
- *curl -i -X POST -d '{ "title": "example1", "description": "Example network", "range": { "address": "fc00::0001::/64", "allocation": "dynamic" }, "vlan": 1}' http://now.example.com:9292/network?user=myuser*
+ *curl -i -X POST -d '{ "title": "example1", "description": "Example network", "range": { "address": "fc00:0001::/64", "allocation": "dynamic" }, "vlan": 1}' http://now.example.com:9292/network?user=myuser*
 
 ### Delete network
 
