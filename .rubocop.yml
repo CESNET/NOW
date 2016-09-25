@@ -26,3 +26,8 @@ Style/LeadingCommentSpace:
 # (do want)
 Style/TrailingCommaInLiteral:
   Enabled: false
+
+# Use normalcase for variable numbers
+# (bug in rubocop)
+Style/VariableNumber:
+  Enabled: false

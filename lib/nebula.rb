@@ -250,16 +250,16 @@ module Now
       raise NowError.new(500), "NOW authorization not enabled for operations #{op2str missing}" unless missing.empty?
 
       operations &= Set[:create, :update]
-      if !operations.empty? && network.vlan
-        # VLAN explicitly as string to reliable compare
-        network.vlan = network.vlan.to_s
-        if @authz_vlan.key?(network.vlan)
-          owner = @authz_vlan[network.vlan]
-          logger.debug "[#{__method__}] for VLAN #{network.vlan} found owner #{owner}"
-          raise NowError.new(403), "#{@user} not authorized to use VLAN #{network.vlan} for operations #{op2str operations}" if owner != @user
-        else
-          logger.debug "[#{__method__}] VLAN #{network.vlan} is free"
-        end
+      return true if operations.empty? || !network.vlan
+
+      # VLAN explicitly as string to reliable compare
+      network.vlan = network.vlan.to_s
+      if @authz_vlan.key?(network.vlan)
+        owner = @authz_vlan[network.vlan]
+        logger.debug "[#{__method__}] for VLAN #{network.vlan} found owner #{owner}"
+        raise NowError.new(403), "#{@user} not authorized to use VLAN #{network.vlan} for operations #{op2str operations}" if owner != @user
+      else
+        logger.debug "[#{__method__}] VLAN #{network.vlan} is free"
       end
     end
 
