@@ -387,7 +387,7 @@ module Now
     end
 
     def parse_network(vn)
-      #logger.debug "[#{__method__}] #{vn.to_xml}"
+      logger.debug "[#{__method__}] #{vn.to_xml}" if config.key?('debug') && config['debug'] && config['debug'].key?('dumps') && config['debug']['dumps']
 
       id = vn.id
       title = vn.name
