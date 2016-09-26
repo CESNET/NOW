@@ -13,7 +13,11 @@ For example using a group (users need to be added to it):
 
     onegroup create --name network --resources NET
 
-Or add ACLs manually (where *groupid* is any users group id number):
+    # set this to 'network' group id number
+    groupid=100
+    oneacl create "@${groupid} CLUSTER/* ADMIN #0"
+
+Or add ACLs manually (where *groupid* is users group id number):
 
     groupid=1
     zone='#0'
@@ -59,7 +63,7 @@ Configuration is `/etc/now.yaml` or `~/.config/now.yaml`:
 ## Usage
 Interface is described in *swagger.yaml*.
 
-Neither authentization or authorization is handled by NOW component, only checks for VLAN ID is performed by NOW.
+Neither authentication or authorization is handled by NOW component, only checks for VLAN ID is performed by NOW.
 
 User identity is part of the URL query. NOW will impersonate this user using the configured service admin account. This way the authorization is delegated to OpenNebula.
 
@@ -78,9 +82,41 @@ User identity is part of the URL query. NOW will impersonate this user using the
 
 ### Update network
 
-Change of the OpenNebula internal attributes are not supported by NOW (VLAN ID, PHYDEV, BRIDGE). OpenNebula permits changing them only under *oneadmin* user or group.
-
  *curl -i -X PUT -d '{ "title": "New Title", "description": "New description", "range": { "address": "fc00:42::/64", "gateway": "fc00:42::1:1"}}" http://now.example.com:9292/network/42?user=myuser*
+
+See also [Limitations/Update network](#Update network).
+
+## Limitations
+
+### Address ranges
+
+Network is permitted to have only one address range.
+
+### Clusters
+
+Network is permitted to be available only on one cluster.
+
+### IP address
+
+For **IPv4**:
+
+* The IP address should point to the first IP address in the address range lease. If the network address is specified instead, 1 as added to this address to produce valid IP address (beware it can be gateway for the network).
+* The first IP address in the range is presented.
+
+For **IPv6**:
+
+* There is required the network address. If IP address is specified, it is converted and network address is used instead.
+* Only 64-bit networks are supported by OpenNebula. Networks from fc00::/7 are used as ULA prefix, any other ranges are used as global prefix.
+* The network address is presented.
+
+### Update network
+
+There are limitation for network update:
+
+* Adding or removing IP address requires additional *NET\_ADMIN* privileges on the network.
+* Changing address type (IPv4 vs IPv6) has been problematic in OpenNebula 5 beta.
+*  (VLAN ID, VN\_MAD, PHYDEV, ...).
+* OpenNebula "internal" attributes can't be modified by NOW (VLAN ID, VN\_MAD, PHYDEV, BRIDGE, ...). OpenNebula permits changing them only under oneadmin user or group.
 
 ## Development
 
