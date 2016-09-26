@@ -39,7 +39,8 @@ describe 'network update' do
       it 'ip' do
         expect(client).to receive('call').with('vn.info', net_id)
         expect(client).to receive('call').with('vn.rename', net_id, 'New title')
-        expect(client).to receive('call').with('vn.update_ar', net_id, /ULA_PREFIX\s*=\s*fc00:42::,?\n/)
+        # here is a workaround: using GLOBAL_PREFIX instead of ULA_PREFIX in the code to make it work
+        expect(client).to receive('call').with('vn.update_ar', net_id, /GLOBAL_PREFIX\s*=\s*fc00:42::,?\n/)
         expect(client).to receive('call').with('vn.update', net_id, /GATEWAY6\s*=\s*fc00:42::1:1,?\s*\n/, 1)
         id = nebula.update_network(net_id, network6)
         expect(id).to eq(net_id.to_s)

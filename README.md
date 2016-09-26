@@ -106,7 +106,8 @@ For **IPv4**:
 For **IPv6**:
 
 * There is required the network address. If IP address is specified, it is converted and network address is used instead.
-* Only 64-bit networks are supported by OpenNebula. Networks from fc00::/7 are used as ULA prefix, any other ranges are used as global prefix.
+* Only 64-bit networks are supported by OpenNebula (both global and local fc00::7).
+* ULA addresses fc00::/7 are stored as global to make it work (tested on OpenNebula <= 5.1.80).
 * The network address is presented.
 
 ### Update network

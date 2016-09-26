@@ -457,11 +457,13 @@ module Now
       end
       if address.ipv6?
         rattributes['TYPE'] = 'IP6'
-        if IPAddress('fc00::/7').include? address
-          rattributes['ULA_PREFIX'] = address.network.to_s
-        else
-          rattributes['GLOBAL_PREFIX'] = address.network.to_s
-        end
+        # local IPv6 address doesn't work in OpenNebula 5.1.80 ==> always use global
+        rattributes['GLOBAL_PREFIX'] = address.network.to_s
+        #if IPAddress('fc00::/7').include? address
+        #  rattributes['ULA_PREFIX'] = address.network.to_s
+        #else
+        #  rattributes['GLOBAL_PREFIX'] = address.network.to_s
+        #end
         rattributes['SIZE'] = address.size >= 2**31 ? 2**31 : address.size - 2
       end
 
