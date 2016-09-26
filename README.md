@@ -20,7 +20,7 @@ Or add ACLs manually (where *groupid* is any users group id number):
     oneacl create "@${groupid} NET/* CREATE ${zone}"
     oneacl create "@${groupid} CLUSTER/* ADMIN ${zone}"
 
-NOW needs service admin account(s):
+NOW needs service admin account(s) (password must be at least 32 characters long):
 
     # admin user for impersonation
     oneuser create nowadmin --driver server_cipher 'the-best-strongest-password-ever'
@@ -49,7 +49,9 @@ Configuration is `/etc/now.yaml` or `~/.config/now.yaml`:
     # parameters for new user networks:
     # * VN_MAD is required
     # * PHYDEV or BRIDGE are required for 'vxlan'
+    # * AUTOMATIC_VLAN_ID *must* be there since OpenNebula 5.0
     network:
+      AUTOMATIC_VLAN_ID: yes
       VN_MAD: vxlan
       BRIDGE: br0
       PHYDEV: eth0

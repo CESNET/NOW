@@ -3,5 +3,7 @@ opennebula:
   admin_password: 'the-best-strongest-password-ever'
   endpoint: http://localhost:2633/RPC2
 network:
+  # must be there since OpenNebula 5.0
+  AUTOMATIC_VLAN_ID: yes
   PHYDEV: eth0
   VN_MAD: vxlan

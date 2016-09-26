@@ -419,7 +419,10 @@ module Now
       attributes['NAME'] = netinfo.title if netinfo.title
       attributes['DESCRIPTION'] = netinfo.description if netinfo.description
       attributes['CLUSTERS'] = netinfo.zone if netinfo.zone
-      attributes['VLAN_ID'] = netinfo.vlan if netinfo.vlan
+      if netinfo.vlan
+        attributes['VLAN_ID'] = netinfo.vlan
+        delete attributes['AUTOMATIC_VLAN_ID'] if attributes.key?('AUTOMATIC_VLAN_ID')
+      end
       if range
         address = range.address
         attributes['GATEWAY'] = range.gateway if range.gateway && address.ipv4?
