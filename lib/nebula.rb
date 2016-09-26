@@ -448,19 +448,21 @@ module Now
     def raw2template_range(range, rattributes)
       return '' unless range
 
-      if range.address.ipv4?
+      address = IPAddress(range.address.to_string)
+      if address.ipv4?
+        address[3] += 1 if address == address.network
         rattributes['TYPE'] = 'IP4'
-        rattributes['IP'] = range.address.to_s
-        rattributes['SIZE'] = range.address.size - 2
+        rattributes['IP'] = address.to_s
+        rattributes['SIZE'] = address.size - 2
       end
-      if range.address.ipv6?
+      if address.ipv6?
         rattributes['TYPE'] = 'IP6'
-        if IPAddress('fc00::/7').include? range.address
-          rattributes['ULA_PREFIX'] = range.address.network.to_s
+        if IPAddress('fc00::/7').include? address
+          rattributes['ULA_PREFIX'] = address.network.to_s
         else
-          rattributes['GLOBAL_PREFIX'] = range.address.network.to_s
+          rattributes['GLOBAL_PREFIX'] = address.network.to_s
         end
-        rattributes['SIZE'] = range.address.size >= 2**31 ? 2**31 : range.address.size - 2
+        rattributes['SIZE'] = address.size >= 2**31 ? 2**31 : address.size - 2
       end
 
       b = binding
