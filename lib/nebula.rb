@@ -61,6 +61,7 @@ module Now
       @config = config
       #logger.debug "[nebula] Configuration: #{config}"
 
+      raise NowError.new(500), 'NOW not configured' if !config.key?('opennebula') || !config['opennebula'] || !config['opennebula'].key?('endpoint')
       @url = config['opennebula']['endpoint']
     end
 

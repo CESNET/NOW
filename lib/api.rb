@@ -11,7 +11,11 @@ module Now
 
     def initialize
       super
-      @nebula = Now::Nebula.new($config)
+      begin
+        @nebula = Now::Nebula.new($config)
+      rescue NowError => e
+        $logger.error "[HTTP #{e.code}] #{e.message}"
+      end
     end
 
     configure do
@@ -24,6 +28,13 @@ module Now
       env['rack.logger'] = $logger
     end
 
+    helpers do
+      def authz(op)
+        raise NowError.new(500), 'NOW not initialized' unless nebula
+        nebula.init_authz(params['user'], op)
+      end
+    end
+
     get '/' do
       cross_origin
       API_VERSION
@@ -32,7 +43,7 @@ module Now
     get '/network' do
       cross_origin
       begin
-        nebula.init_authz(params['user'], Set[:get])
+        authz(Set[:get])
         networks = nebula.list_networks
         JSON.pretty_generate(networks.map(&:to_hash))
       rescue NowError => e
@@ -60,7 +71,7 @@ module Now
             halt 400, e.message
           end
         end
-        nebula.init_authz(params['user'], Set[:create])
+        authz(Set[:create])
         network = Now::Network.new(netinfo)
         id = nebula.create_network(network)
       rescue NowError => e
@@ -75,7 +86,7 @@ module Now
     get '/network/:id' do
       cross_origin
       begin
-        nebula.init_authz(params['user'], Set[:get])
+        authz(Set[:get])
         network = nebula.get(params['id'])
         JSON.pretty_generate(network.to_hash)
       rescue NowError => e
@@ -87,7 +98,7 @@ module Now
     delete '/network/:id' do
       cross_origin
       begin
-        nebula.init_authz(params['user'], Set[:delete])
+        authz(Set[:delete])
         nebula.delete_network(params['id'])
       rescue NowError => e
         logger.error "[HTTP #{e.code}] #{e.message}"
@@ -114,7 +125,7 @@ module Now
             halt 400, e.message
           end
         end
-        nebula.init_authz(params['user'], Set[:update])
+        authz(Set[:update])
         network = Now::Network.new(netinfo)
         id = nebula.update_network(params['id'], network)
       rescue NowError => e
