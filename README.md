@@ -9,20 +9,21 @@ Network Orchestrator Wrapper is the component to extend OpenNebula network orche
 
 Users need permissions to manage networks (see [OpenNebula API documentation](http://docs.opennebula.org/stable/integration/system_interfaces/api.html#onevnet)).
 
-For example using a group (users need to be added to it):
+Direct setting of ACL (where *groupid* is users group id number):
+
+    groupid=1
+    zone='#0'
+    oneacl create "@${groupid} NET/* CREATE+ADMIN ${zone}"
+    oneacl create "@${groupid} CLUSTER/* ADMIN ${zone}"
+
+Alternativelly separated group could be used (users need to be added to it):
 
     onegroup create --name network --resources NET
 
     # set this to 'network' group id number
     groupid=100
+    oneacl create "@${groupid} NET/* ADMIN ${zone}"
     oneacl create "@${groupid} CLUSTER/* ADMIN #0"
-
-Or add ACLs manually (where *groupid* is users group id number):
-
-    groupid=1
-    zone='#0'
-    oneacl create "@${groupid} NET/* CREATE ${zone}"
-    oneacl create "@${groupid} CLUSTER/* ADMIN ${zone}"
 
 NOW needs service admin account(s) (password must be at least 32 characters long):
 

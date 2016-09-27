@@ -335,10 +335,9 @@ module Now
         gateway = vn['TEMPLATE/GATEWAY6'] if !gateway || gateway.empty?
 
       when nil
-        if ip.nil? || ip.empty?
-          raise NowError.new(422), "No address range and no NETWORK_ADDRESS in the network #{vn_id}"
-        end
+        return nil if !ip || ip.empty?
         address = IPAddress ip
+
       else
         raise NowError.new(501), "Unknown type '#{type}' in the address range #{id} of network #{vn_id}"
       end
