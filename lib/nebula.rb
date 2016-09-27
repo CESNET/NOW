@@ -450,10 +450,15 @@ module Now
 
       address = IPAddress(range.address.to_string)
       if address.ipv4?
-        address[3] += 1 if address == address.network
         rattributes['TYPE'] = 'IP4'
-        rattributes['IP'] = address.to_s
-        rattributes['SIZE'] = address.size - 2
+        if address.prefix < 31
+          address[3] += 1 if address == address.network
+          rattributes['IP'] = address.to_s
+          rattributes['SIZE'] = address.size - 2
+        else
+          rattributes['IP'] = address.to_s
+          rattributes['SIZE'] = address.size
+        end
       end
       if address.ipv6?
         rattributes['TYPE'] = 'IP6'
