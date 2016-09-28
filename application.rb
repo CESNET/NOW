@@ -10,9 +10,9 @@ require './lib/config'
 require './lib/nebula'
 require './lib/api'
 
+# initial application logger, switched to rack.logger later
 $logger = Logger.new(STDOUT)
-$logger.formatter = proc do |severity, datetime, _progname, msg|
-  date_format = datetime.strftime('%Y-%m-%dT%H:%M:%S%z')
-  format("[#{date_format}] %5{severity}: #{msg}\n", severity: severity)
+$logger.formatter = proc do |_severity, _datetime, _progname, msg|
+  format("#{msg}\n")
 end
 $config = Now::Config.new

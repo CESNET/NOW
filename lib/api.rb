@@ -20,12 +20,17 @@ module Now
 
     configure do
       enable :logging, :dump_errors
+      set :raise_errors, false
+    end
+
+    configure :development do
+      enable :logging, :dump_errors
+      set :logging, Logger::DEBUG
       set :raise_errors, true
     end
 
     before do
-      # to sinatra request logger point to proper object
-      env['rack.logger'] = $logger
+      $logger = env['rack.logger']
     end
 
     helpers do

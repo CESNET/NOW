@@ -71,6 +71,7 @@ module Now
     # @param user [String] user name (nil for direct login as admin_user)
     # @param operations [Set] planned operations: :create, :update, :delete, :get
     def init_authz(user, operations)
+      @logger = $logger
       # only create and update operation needs to fetch information about networks
       enable_authz = !(Set[:create, :update] & operations).empty?
 
