@@ -276,23 +276,23 @@ module Now
     def error_one2http(errno)
       case errno
       when OpenNebula::Error::ESUCCESS
-        return 200
+        200
       when OpenNebula::Error::EAUTHENTICATION
-        return 401
+        401
       when OpenNebula::Error::EAUTHORIZATION
-        return 403
+        403
       when OpenNebula::Error::ENO_EXISTS
-        return 404
+        404
       when OpenNebula::Error::EXML_RPC_API
-        return 500
+        500
       when OpenNebula::Error::EACTION
-        return 400
+        400
       when OpenNebula::Error::EINTERNAL
-        return 500
+        500
       when OpenNebula::Error::ENOTDEFINED
-        return 501
+        501
       else
-        return 500
+        500
       end
     end
 
