@@ -1,4 +1,5 @@
 require 'json'
+require 'logger'
 require 'sinatra'
 require 'sinatra/cross_origin'
 require ::File.expand_path('../../version', __FILE__)
@@ -25,7 +26,7 @@ module Now
 
     configure :development do
       enable :logging, :dump_errors
-      set :logging, Logger::DEBUG
+      set :logging, ::Logger::DEBUG
       set :raise_errors, true
     end
 
