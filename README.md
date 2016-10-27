@@ -7,32 +7,32 @@ Network Orchestrator Wrapper is the component to extend OpenNebula network orche
 
 ### At OpenNebula host
 
-Users need permissions to manage networks (see [OpenNebula API documentation](http://docs.opennebula.org/stable/integration/system_interfaces/api.html#onevnet)).
+NOW needs service admin account with all neccessary permissions (see [OpenNebula API documentation](http://docs.opennebula.org/stable/integration/system_interfaces/api.html#onevnet)). Password must be at least 32 characters long:
 
-Direct setting of ACL (where *groupid* is users group id number):
+    oneuser create nowadmin --driver server_cipher 'the-best-strongest-password-ever'
+    oneuser chgrp nowadmin oneadmin
 
-    groupid=1
+Direct setting of ACL:
+
+    # set this to 'nowadmin' user id (oneuser list)
+    userid='#3'
     zone='#0'
-    oneacl create "@${groupid} NET/* CREATE+ADMIN ${zone}"
-    oneacl create "@${groupid} CLUSTER/* ADMIN ${zone}"
+    oneacl create "${userid} NET/* MANAGE+ADMIN+CREATE ${zone}"
+    oneacl create "${userid} CLUSTER/* ADMIN ${zone}"
+    oneacl create "${userid} USER/* MANAGE ${zone}"
 
-Alternativelly separated group could be used (users need to be added to it):
+Alternativelly separated group could be used:
 
     onegroup create --name network --resources NET
 
-    # set this to 'network' group id number
-    groupid=100
-    oneacl create "@${groupid} NET/* ADMIN ${zone}"
-    oneacl create "@${groupid} CLUSTER/* ADMIN #0"
+    # set this to 'network' group id (onegroup list)
+    groupid='@100'
+    zone='#0'
+    oneacl create "${groupid} NET/* MANAGE+ADMIN ${zone}"
+    oneacl create "${groupid} CLUSTER/* ADMIN ${zone}"
+    oneacl create "${groupid} USER/* MANAGE ${zone}"
 
-NOW needs service admin account(s) (password must be at least 32 characters long):
-
-    # admin user for impersonation
-    oneuser create nowadmin --driver server_cipher 'the-best-strongest-password-ever'
-    oneuser chgrp nowadmin oneadmin
-    # admin user to read everything (it must be in all users groups or have
-    # proper ACLs), it may be different account
-    oneuser addgroup nowadmin users
+    oneuser addgroup nowadmin network
 
 ### At NOW host
 
@@ -47,10 +47,6 @@ Configuration is `/etc/now.yaml` or `~/.config/now.yaml`:
       # OpenNebula RPC endpoint
       endpoint: http://nebula.example.com:2633/RPC2
 
-      # super user which must be in all user groups to see everything,
-      # only read permission is needed (defaults to admin_user)
-      super_user: 'nowadmin'
-
     # parameters for new user networks:
     # * VN_MAD is required
     # * PHYDEV or BRIDGE are required for 'vxlan'
@@ -64,14 +60,22 @@ Configuration is `/etc/now.yaml` or `~/.config/now.yaml`:
 ## Usage
 Interface is described in *swagger.yaml*.
 
-Neither authentication or authorization is handled by NOW component, only checks for VLAN ID is performed by NOW.
+Authentication is not handled by NOW component. User identity is part of the URL query.
 
-User identity is part of the URL query. NOW will impersonate this user using the configured service admin account. This way the authorization is delegated to OpenNebula.
+Authorizations performed by NOW:
 
+* VLAN ID is checked for create and update operations
+* owner must be the same for update and delete operations
+
+For read operations authorization is delegated to OpenNebula (list, get). NOW impersonates user using the configured service admin account.
 
 ### List networks
 
  *curl http://now.example.com:9292/network?user=myuser*
+
+### Get network info
+
+ *curl http://now.example.com:9292/network/1?user=myuser*
 
 ### Create network
 
@@ -115,10 +119,7 @@ For **IPv6**:
 
 There are limitation for network update:
 
-* Adding or removing IP address requires additional *NET\_ADMIN* privileges on the network.
 * Changing address type (IPv4 vs IPv6) has been problematic in OpenNebula 5 beta.
-*  (VLAN ID, VN\_MAD, PHYDEV, ...).
-* OpenNebula "internal" attributes can't be modified by NOW (VLAN ID, VN\_MAD, PHYDEV, BRIDGE, ...). OpenNebula permits changing them only under oneadmin user or group.
 
 ## Development
 

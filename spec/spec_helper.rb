@@ -18,21 +18,28 @@ $config = {
     'PHYDEV' => 'eth0',
   },
   'opennebula' => {
-    'endpoint' => 'myendpoint',
+    'admin_password' => '012345678911234567892123456789',
+    'endpoint' => 'https://localhost',
   },
   'template_dir' => ::File.expand_path('../../templates', __FILE__),
 }
 
 module Now
   class Nebula
+    attr_reader :uid, :authz_vlan
+
     def fake_ctx(ctx)
       @ctx = ctx
     end
 
     def fake_authz(user, operations, vlans)
-      @authz = operations
+      @authz_ops = operations
       @authz_vlan = vlans
       @user = user
+    end
+
+    def one_connect(_url, _credentials)
+      @ctx
     end
   end
 end

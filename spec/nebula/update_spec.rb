@@ -5,7 +5,7 @@ describe 'network update' do
   net = l('network-example')
   net_id = 0
   nebula_base = Now::Nebula.new($config)
-  nebula_base.fake_authz('theuser', Set[:update], {})
+  nebula_base.fake_authz('oneadmin', Set[:update], {})
 
   context 'ctx' do
     let(:client) do
@@ -58,12 +58,20 @@ describe 'network update' do
         nebula_base.fake_authz('theuser', Set[:get], {})
         nebula_base
       end
+      let(:nebula_foreignauthz) do
+        nebula_base.fake_ctx(client)
+        nebula_base.fake_authz('theforeignuser', Set[:update], {})
+        nebula_base
+      end
 
       it 'no authz raise' do
         expect { nebula_noauthz.update_network(net_id, network4) }.to raise_error(Now::NowError)
       end
       it 'get authz raise' do
         expect { nebula_getauthz.update_network(net_id, network6) }.to raise_error(Now::NowError)
+      end
+      it 'foreign authz raise' do
+        expect { nebula_foreignauthz.update_network(net_id, network4) }.to raise_error(Now::NowError)
       end
     end
   end

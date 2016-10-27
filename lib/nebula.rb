@@ -9,9 +9,10 @@ module Now
   # NOW core class for communication with OpenNebula
   class Nebula
     attr_accessor :logger, :config
-    @authz = nil
+    @authz_ops = nil
     @authz_vlan = nil
     @ctx = nil
+    @uid = nil
     @user = nil
 
     def one_connect(url, credentials)
@@ -26,31 +27,35 @@ module Now
     # 1) admin_user with server_cipher driver and user must be specified in query parameter
     #
     # 2) admin_user with regular password and user may not be specified
-    #    Impersonation is not possible, so admin_user must be the same as super_user
-    #    (=must have enough rights to read everything).
+    #    Impersonation is not possible.
     #
     # In multi-user environment the choice 1) is needed.
     #
     # @param user [String] user name (nil for direct login as admin_user)
-    def switch_user(user)
+    def switch_user(user, admin_login)
       admin_user = config['opennebula']['admin_user']
       admin_password = config['opennebula']['admin_password']
+      login = if admin_login
+                admin_user
+              else
+                user
+              end
 
       if user
-        logger.debug "Authentication from #{admin_user} to #{user}"
+        logger.info "Authentication from #{admin_user} to #{login}"
 
         server_auth = ServerCipherAuth.new(admin_user, admin_password)
         expiration = Time.now.to_i + EXPIRE_LENGTH
-        user_token = server_auth.login_token(expiration, user)
+        user_token = server_auth.login_token(expiration, login)
 
-        @user = user
         @ctx = one_connect(@url, user_token)
+        @user = user
       else
-        logger.debug "Authentication to #{admin_user}"
+        logger.info "Authentication to #{admin_user}"
 
         direct_token = "#{admin_user}:#{admin_password}"
-        @user = admin_user
         @ctx = one_connect(@url, direct_token)
+        @user = admin_user
       end
     end
 
@@ -72,17 +77,34 @@ module Now
     # @param operations [Set] planned operations: :create, :update, :delete, :get
     def init_authz(user, operations)
       @logger = $logger
-      # only create and update operation needs to fetch information about networks
-      enable_authz = !(Set[:create, :update] & operations).empty?
+      # only create and update operations need to fetch information about networks
+      extended_authz = !(Set[:create, :update] & operations).empty?
+      write_authz = !(Set[:create, :delete, :update] & operations).empty?
 
-      if enable_authz
+      # for create operation we need user id number
+      # (scaning users on behalf of logged user is more cheap)
+      @uid = nil
+      unless (Set[:create] & operations).empty?
+        switch_user(user, false)
+        user_pool = OpenNebula::UserPool.new(@ctx)
+        check(user_pool.info)
+        logger.debug "[#{__method__}] #{user_pool.to_xml}" if config.key?('debug') && config['debug'] && config['debug'].key?('dumps') && config['debug']['dumps']
+        user_pool.each do |u|
+          if u['NAME'] == user
+            @uid = u.id
+            break
+          end
+        end
+        logger.info "[#{__method__}] user ID: #{@uid}"
+        raise NowError.new(400), "User #{user} not found" unless @uid
+      end
+
+      if extended_authz
         logger.debug "[#{__method__}] extended authorization needed, data will be fetched"
 
-        # impersonation not possible when using direct login
-        super_user = (config['opennebula']['super_user'] if user)
-        switch_user(super_user)
+        switch_user(user, true)
 
-        @authz = Set[:get]
+        @authz_ops = Set[:get]
         @authz_vlan = {}
         list_networks.each do |n|
           # VLAN explicitly as string to reliable compare
@@ -93,13 +115,19 @@ module Now
         logger.debug "[#{__method__}] extended authorization not needed for #{op2str operations}"
       end
 
-      switch_user(user) if user || !enable_authz
-      @authz = operations
+      # write operations need to connect to OpenNebula with NOW admin service account
+      if write_authz
+        switch_user(user, true) unless extended_authz
+      else
+        switch_user(user, false)
+      end
+
+      @authz_ops = operations
     end
 
     # List all accessible OpenNebula networks
     def list_networks
-      authz(Set[:get], nil)
+      authz(Set[:get], nil, nil)
       vn_pool = OpenNebula::VirtualNetworkPool.new(@ctx, -1)
       check(vn_pool.info)
 
@@ -121,7 +149,7 @@ module Now
     # @param network_id [String] OpenNebula network ID
     def get(network_id)
       logger.debug "[#{__method__}] #{network_id}"
-      authz(Set[:get], nil)
+      authz(Set[:get], nil, nil)
       vn_generic = OpenNebula::VirtualNetwork.build_xml(network_id)
       vn = OpenNebula::VirtualNetwork.new(vn_generic, @ctx)
       check(vn.info)
@@ -133,10 +161,10 @@ module Now
     #
     # @param netinfo [Now::Network] network to create
     def create_network(netinfo)
-      authz(Set[:create], netinfo)
+      authz(Set[:create], nil, netinfo)
       logger.debug "[#{__method__}] #{netinfo}"
-      logger.info "[#{__method__}] Network ID ignored (set by OpenNebula)" if netinfo.id
-      logger.info "[#{__method__}] Network owner ignored (will be '#{@user}')" if netinfo.user
+      logger.info "[#{__method__}] network ID ignored (set by OpenNebula)" if netinfo.id
+      logger.info "[#{__method__}] network owner ignored (will be '#{@user}')" if netinfo.user
 
       range = netinfo.range
       if range && range.address && range.address.ipv6?
@@ -152,6 +180,9 @@ module Now
       id = vn.id.to_s
       logger.info "[#{__method__}] created network: #{id}"
 
+      check(vn.chown(@uid, -1))
+      logger.debug "[#{__method__}] ownership of network #{id} changed to #{@uid}"
+
       id
     end
 
@@ -160,9 +191,10 @@ module Now
     # @param network_id [String] OpenNebula network ID
     def delete_network(network_id)
       logger.debug "[#{__method__}] #{network_id}"
-      authz(Set[:delete], nil)
       vn_generic = OpenNebula::VirtualNetwork.build_xml(network_id)
       vn = OpenNebula::VirtualNetwork.new(vn_generic, @ctx)
+      check(vn.info)
+      authz(Set[:delete], vn, nil)
       check(vn.delete)
       logger.info "[#{__method__}] deleted network: #{network_id}"
     end
@@ -182,7 +214,6 @@ module Now
     # @param netinfo [Now::Network] sparse network structure with attributes to modify
     def update_network(network_id, netinfo)
       logger.debug "[#{__method__}] #{network_id}, #{netinfo}"
-      authz(Set[:update], netinfo)
       #logger.debug "[#{__method__}] #{netinfo}"
       logger.info "[#{__method__}] Network ID ignored (got from URL)" if netinfo.id
       logger.info "[#{__method__}] Network owner ignored (change not implemented)" if netinfo.user
@@ -190,6 +221,7 @@ module Now
       vn_generic = OpenNebula::VirtualNetwork.build_xml(network_id)
       vn = OpenNebula::VirtualNetwork.new(vn_generic, @ctx)
       check(vn.info)
+      authz(Set[:update], vn, netinfo)
 
       if netinfo.title
         logger.info "[#{__method__}] renaming network #{network_id} to '#{netinfo.title}'"
@@ -240,28 +272,32 @@ module Now
     #
     # @param operations [Set] operations to perform (:get, :create, :modify, :delete)
     # @param network [Now::Network] network (for :create and :modify)
-    def authz(operations, network)
-      if network && network.vlan
-        logger.debug "[#{__method__}] checking VLAN #{network.vlan}, operations #{op2str operations}"
+    def authz(operations, network_old, network_new)
+      if network_new && network_new.vlan
+        logger.debug "[#{__method__}] checking VLAN #{network_new.vlan}, operations #{op2str operations}"
       else
         logger.debug "[#{__method__}] checking operations #{op2str operations}"
       end
-      raise NowError.new(500), 'NOW authorization not initialized' unless @authz
+      raise NowError.new(500), 'NOW authorization not initialized' unless @authz_ops
 
-      missing = operations - @authz
+      missing = operations - @authz_ops
       raise NowError.new(500), "NOW authorization not enabled for operations #{op2str missing}" unless missing.empty?
 
+      unless (Set[:delete, :update] & operations).empty?
+        raise NowError.new(403), "#{@user} not authorized to perform #{op2str operations} on network #{network_old.id}" unless network_old['UNAME'] == @user
+      end
+
       operations &= Set[:create, :update]
-      return true if operations.empty? || !network.vlan
+      return true if operations.empty? || !network_new.vlan
 
       # VLAN explicitly as string to reliable compare
-      network.vlan = network.vlan.to_s
-      if @authz_vlan.key?(network.vlan)
-        owner = @authz_vlan[network.vlan]
-        logger.debug "[#{__method__}] for VLAN #{network.vlan} found owner #{owner}"
-        raise NowError.new(403), "#{@user} not authorized to use VLAN #{network.vlan} for operations #{op2str operations}" if owner != @user
+      network_new.vlan = network_new.vlan.to_s
+      if @authz_vlan.key?(network_new.vlan)
+        owner = @authz_vlan[network_new.vlan]
+        logger.debug "[#{__method__}] for VLAN #{network_new.vlan} found owner #{owner}"
+        raise NowError.new(403), "#{@user} not authorized to use VLAN #{network_new.vlan} for operations #{op2str operations}" if owner != @user
       else
-        logger.debug "[#{__method__}] VLAN #{network.vlan} is free"
+        logger.debug "[#{__method__}] VLAN #{network_new.vlan} is free"
       end
     end
 
@@ -422,7 +458,7 @@ module Now
       attributes['CLUSTERS'] = netinfo.zone if netinfo.zone
       if netinfo.vlan
         attributes['VLAN_ID'] = netinfo.vlan
-        delete attributes['AUTOMATIC_VLAN_ID'] if attributes.key?('AUTOMATIC_VLAN_ID')
+        attributes.delete('AUTOMATIC_VLAN_ID') if attributes.key?('AUTOMATIC_VLAN_ID')
       end
       if range
         address = range.address
