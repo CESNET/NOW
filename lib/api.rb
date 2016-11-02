@@ -43,7 +43,7 @@ module Now
 
     get '/' do
       cross_origin
-      API_VERSION
+      VERSION
     end
 
     get '/network' do

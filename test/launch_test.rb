@@ -9,6 +9,6 @@ class LaunchTest < Minitest::Test
 
   def test_my_default
     get '/'
-    assert_equal Now::API_VERSION, last_response.body
+    assert_equal Now::VERSION, last_response.body
   end
 end
