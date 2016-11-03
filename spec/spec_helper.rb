@@ -1,5 +1,12 @@
 require 'rspec'
 
+begin
+  require 'simplecov'
+  SimpleCov.start
+rescue LoadError
+  print "No coverage, simplecov not installed\n\n"
+end
+
 Dir['./models/helpers/*.rb', './models/*.rb', './lib/*.rb'].each do |file|
   require file
 end

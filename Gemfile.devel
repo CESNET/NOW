@@ -13,3 +13,4 @@ gem 'minitest', group: :development
 gem 'rack-test', group: :development
 gem 'rspec', group: :development
 gem 'rubocop', group: :development, require: false
+gem 'simplecov', group: :development, require: false
