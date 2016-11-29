@@ -1,6 +1,7 @@
 source 'https://rubygems.org'
 
-gem 'ipaddress'
+# for []= operation
+gem 'ipaddress', ">= 0.8.2"
 gem 'opennebula'
 gem 'sinatra'
 gem 'sinatra-cross_origin'
