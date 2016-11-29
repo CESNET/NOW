@@ -40,6 +40,44 @@ describe 'network create' do
     end
   end
 
+  context 'adjust IPv4' do
+    let(:client) do
+      instance_double('client', call: '1')
+    end
+    let(:nebula) do
+      nebula_base.fake_ctx(client)
+      nebula_base
+    end
+    let(:network) do
+      range = Now::Range.new(address: IPAddress.parse('192.168.1.0/24'), gateway: IPAddress.parse('192.168.1.1'))
+      Now::Network.new(title: 'example', description: 'Description', range: range)
+    end
+    it 'ip' do
+      expect(client).to receive('call').with('vn.allocate', /IP\s*=\s*192.168.1.1\s*,?\s*\n/, -1)
+      id = nebula.create_network(network)
+      expect(id).to eq('1')
+    end
+  end
+
+  context 'adjust IPv6' do
+    let(:client) do
+      instance_double('client', call: '1')
+    end
+    let(:nebula) do
+      nebula_base.fake_ctx(client)
+      nebula_base
+    end
+    let(:network) do
+      range = Now::Range.new(address: IPAddress.parse('fd00::2/8'), gateway: IPAddress.parse('fd00::1'))
+      Now::Network.new(title: 'example', description: 'Description', range: range)
+    end
+    it 'ip' do
+      expect(client).to receive('call').with('vn.allocate', /GLOBAL_PREFIX\s*=\s*fd00::\s*,?\s*\n/, -1)
+      id = nebula.create_network(network)
+      expect(id).to eq('1')
+    end
+  end
+
   context 'authz' do
     let(:client) do
       instance_double('client', call: '1')
