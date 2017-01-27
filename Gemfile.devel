@@ -10,6 +10,8 @@ gem 'thin', require: false
 
 # for less insane requirements
 gem 'rack', "< 2.0.0", group: :development
+# for less insane requirements (ruby 2.0)
+gem 'nokogiri', "~> 1.6.0"
 gem 'minitest', group: :development
 gem 'rack-test', group: :development
 gem 'rspec', group: :development
