@@ -12,7 +12,18 @@ NOW needs service admin account with all neccessary permissions (see [OpenNebula
     oneuser create nowadmin --driver server_cipher 'the-best-strongest-password-ever'
     oneuser chgrp nowadmin oneadmin
 
-Direct setting of ACL:
+    onegroup create --name nowadmin --resources NET
+
+    # set this to 'nowadmin' group id (onegroup list)
+    groupid='@100'
+    zone='#0'
+    oneacl create "${groupid} NET/* MANAGE+ADMIN ${zone}"
+    oneacl create "${groupid} CLUSTER/* ADMIN ${zone}"
+    oneacl create "${groupid} USER/* MANAGE ${zone}"
+
+    oneuser addgroup nowadmin nowadmin
+
+Alternatively, instead of using 'nowadmin' group, you can set ACL directly on 'nowadmin' account:
 
     # set this to 'nowadmin' user id (oneuser list)
     userid='#3'
@@ -21,22 +32,9 @@ Direct setting of ACL:
     oneacl create "${userid} CLUSTER/* ADMIN ${zone}"
     oneacl create "${userid} USER/* MANAGE ${zone}"
 
-Alternativelly separated group could be used:
-
-    onegroup create --name network --resources NET
-
-    # set this to 'network' group id (onegroup list)
-    groupid='@100'
-    zone='#0'
-    oneacl create "${groupid} NET/* MANAGE+ADMIN ${zone}"
-    oneacl create "${groupid} CLUSTER/* ADMIN ${zone}"
-    oneacl create "${groupid} USER/* MANAGE ${zone}"
-
-    oneuser addgroup nowadmin network
-
 ### At NOW host
 
-Configuration is `/etc/now.yaml` or `~/.config/now.yaml`:
+Configuration is `/etc/now.yml` or `~/.config/now.yml`:
 
     opennebula:
       # admin user used as service account for impersonation
