@@ -4,7 +4,6 @@ source 'https://rubygems.org'
 gem 'ipaddress', ">= 0.8.2"
 gem 'opennebula'
 gem 'sinatra'
-gem 'sinatra-cross_origin'
 # recommended for sinatra
 gem 'thin', require: false
 

@@ -1,14 +1,12 @@
 require 'json'
 require 'logger'
 require 'sinatra'
-require 'sinatra/cross_origin'
 require ::File.expand_path('../../version', __FILE__)
 
 module Now
   # HTTP REST API of NOW (for usage by rOCCI server)
   class Application < Sinatra::Base
     attr_accessor :nebula
-    register Sinatra::CrossOrigin
 
     def initialize
       super
@@ -42,12 +40,10 @@ module Now
     end
 
     get '/' do
-      cross_origin
       VERSION
     end
 
     get '/network' do
-      cross_origin
       begin
         authz(Set[:get])
         networks = nebula.list_networks
@@ -59,7 +55,6 @@ module Now
     end
 
     post '/network' do
-      cross_origin
       request.body.rewind
       begin
         begin
@@ -90,7 +85,6 @@ module Now
     end
 
     get '/network/:id' do
-      cross_origin
       begin
         authz(Set[:get])
         network = nebula.get(params['id'])
@@ -102,7 +96,6 @@ module Now
     end
 
     delete '/network/:id' do
-      cross_origin
       begin
         authz(Set[:delete])
         nebula.delete_network(params['id'])
@@ -113,7 +106,6 @@ module Now
     end
 
     put '/network/:id' do
-      cross_origin
       request.body.rewind
       begin
         begin
