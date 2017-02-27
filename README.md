@@ -55,6 +55,8 @@ Configuration is `/etc/now.yml` or `~/.config/now.yml`:
       BRIDGE: br0
       PHYDEV: eth0
 
+For deployment of NOW using Puppet see example: `example/puppet/site.pp`.
+
 ## Usage
 Interface is described in *swagger.yaml*.
 
