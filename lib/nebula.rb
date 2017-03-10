@@ -170,13 +170,23 @@ module Now
       if range && range.address && range.address.ipv6?
         logger.warn "[#{__method__}] Network prefix 64 for IPv6 network required (#{range.address.to_string})" unless range.address.prefix == 64
       end
+      default_cluster = if config.key?('opennebula') && config['opennebula'].key?('cluster')
+                          config['opennebula']['cluster']
+                        else
+                          OpenNebula::ClusterPool::NONE_CLUSTER_ID
+                        end
+      cluster = if netinfo.zone
+                  netinfo.zone
+                else
+                  default_cluster
+                end
       vn_generic = OpenNebula::VirtualNetwork.build_xml
       vn = OpenNebula::VirtualNetwork.new(vn_generic, @ctx)
 
       template = raw2template_network(netinfo, {}, nil) + "\n" + raw2template_range(netinfo.range, {})
       logger.debug "[#{__method__}] template: #{template}"
 
-      check(vn.allocate(template))
+      check(vn.allocate(template, cluster))
       id = vn.id.to_s
       logger.info "[#{__method__}] created network: #{id}"
 
@@ -455,7 +465,6 @@ module Now
       attributes.merge!(config['network']) if config.key?('network') && config['network']
       attributes['NAME'] = netinfo.title if netinfo.title
       attributes['DESCRIPTION'] = netinfo.description if netinfo.description
-      attributes['CLUSTERS'] = netinfo.zone if netinfo.zone
       if netinfo.vlan
         attributes['VLAN_ID'] = netinfo.vlan
         attributes.delete('AUTOMATIC_VLAN_ID') if attributes.key?('AUTOMATIC_VLAN_ID')

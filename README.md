@@ -45,6 +45,9 @@ Configuration is `/etc/now.yml` or `~/.config/now.yml`:
       # OpenNebula RPC endpoint
       endpoint: http://nebula.example.com:2633/RPC2
 
+      # OpenNebula cluster to use
+      #cluster: 0
+
     # parameters for new user networks:
     # * VN_MAD is required
     # * PHYDEV or BRIDGE are required for 'vxlan'
