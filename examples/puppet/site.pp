@@ -44,6 +44,10 @@ apache::vhost { 'now-site':
 
   passenger_user          => 'now',
   passenger_min_instances => 3,
+
+  custom_fragment         => '
+  RackEnv production
+',
 }
 
 file { '/etc/now.yml':
